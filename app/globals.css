@@ -1,0 +1,226 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Jalan Projects — design tokens
+   Drawn from the crest: gold on cream, with a warm near-black for depth.
+   --------------------------------------------------------------------------- */
+
+@theme {
+  /* Grounds */
+  --color-white: #ffffff;
+  --color-paper: #fdfcf9; /* warm cream — the default ground */
+  --color-shell: #f5f1e8; /* raised panels, hover states */
+
+  /* Ink */
+  --color-ink: #16130e; /* warm near-black. 18.6:1 on paper */
+  --color-grey: #6b6355; /* secondary text. 5.9:1 on paper */
+  --color-line: #e7e0d0; /* hairlines */
+
+  /* Gold — the crest colour.
+     --gold is 2.4:1 on paper: DECORATIVE ONLY. Rules, fills, large display,
+     and anything sitting on --ink. Never small text on a light ground.
+     --gold-deep is 5.0:1 on paper and is the text-safe accent. */
+  --color-gold: #c9a227;
+  --color-gold-deep: #8a6d1f;
+  --color-gold-wash: #faf4e2;
+
+  /* Typography */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-body: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --text-display-xl: clamp(2.75rem, 7.5vw, 7.5rem);
+  --text-display-l: clamp(2.125rem, 4.4vw, 4rem);
+  --text-display-s: clamp(1.5rem, 2.4vw, 2.125rem);
+  --text-title: 1.3125rem;
+  --text-lead: clamp(1.125rem, 1.5vw, 1.375rem);
+  --text-body: 1.0625rem;
+  --text-numeral: clamp(2rem, 4vw, 3.25rem);
+  --text-label: 0.6875rem;
+
+  --radius-sm: 2px;
+  --spacing-section: clamp(88px, 11vw, 176px);
+  --spacing-gutter: clamp(20px, 5vw, 96px);
+}
+
+/* --------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    /* Lenis owns scrolling; native smooth scroll would fight it. */
+    scroll-behavior: auto;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Fraunces carries the elegance. Optical size high, SOFT rounded slightly,
+     WONK on — the flared cut keeps an elegant serif from reading as a stock
+     luxury face. */
+  .display {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 120, 'SOFT' 40, 'WONK' 1;
+    font-weight: 400;
+    letter-spacing: -0.021em;
+    line-height: 1.03;
+  }
+
+  .display-xl {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+    font-weight: 400;
+    letter-spacing: -0.032em;
+    line-height: 0.94;
+  }
+
+  /* One word per headline. Gold-deep so it survives on cream; components
+     override to --gold on the ink register. */
+  .accent-italic {
+    font-style: italic;
+    font-variation-settings: 'opsz' 144, 'SOFT' 60, 'WONK' 1;
+    color: var(--color-gold-deep);
+  }
+
+  /* Every quantity on this site is mono and tabular. Without exception. */
+  .numeral {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    line-height: 1.2;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold-deep);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-gold);
+    color: var(--color-ink);
+  }
+}
+
+/* SplitText line wrappers. The mask is what makes lines rise rather than fade. */
+.reveal-line {
+  will-change: transform;
+}
+
+/* Range control for the requirement configurator. */
+.range-gold {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--color-line);
+  outline: none;
+  cursor: pointer;
+}
+
+.range-gold::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  border: 2px solid var(--color-ink);
+  cursor: grab;
+  transition: transform 0.18s ease;
+}
+
+.range-gold::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.12);
+}
+
+.range-gold::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  border: 2px solid var(--color-ink);
+  cursor: grab;
+}
+
+.range-gold:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--color-gold-deep);
+  outline-offset: 3px;
+}
+
+/* Scroll-velocity marquee. */
+@keyframes marquee-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-drift 38s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* A hairline gold rule, used to open sections. */
+.rule-gold {
+  background: linear-gradient(
+    to right,
+    var(--color-gold) 0%,
+    var(--color-gold) 22%,
+    var(--color-line) 22%,
+    var(--color-line) 100%
+  );
+}
+
+/* A faint drafting grid the whole document is measured on. */
+.drafting-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 104px 104px;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .drafting-grid {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 200ms !important;
+    scroll-behavior: auto !important;
+  }
+}

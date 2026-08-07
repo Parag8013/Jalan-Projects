@@ -1,0 +1,112 @@
+# Verify before launch
+
+**Every figure below was generated to make the site read as finished. None of it
+came from Jalan Projects.** The design argues that this company is precise about
+land, so a wrong number here does more damage than a blank would.
+
+Nothing ships until this file is empty.
+
+---
+
+## Company scale — `content/site.ts` › `SCALE_FIGURES`
+
+| Shown | Generated value | Confirm with |
+|---|---|---|
+| Acres transacted | **1,450+** | Management |
+| Sq ft delivered | **3.2M** | Projects |
+| Years in operation | **28** | Management |
+| Districts covered | **14** | Sales |
+
+Years in operation is the easiest to check and the most load-bearing — it sits
+under the founding claim.
+
+---
+
+## Parks — `content/site.ts` › `PARKS`
+
+| Park | Total | Available | Power | Roads |
+|---|---|---|---|---|
+| Sankrail, Dhulagori | **110 ac** | **18 ac** | **5 MVA** | **12 m** |
+| Jalan, Amta Road | **85 ac** | **22 ac** | **3 MVA** | **10 m** |
+| Amta, Amta Road | **65 ac** | **26 ac** | **2.5 MVA** | **10 m** |
+
+**Available acreage changes.** Whoever owns sales needs to own this row, and it
+should be reviewed on a fixed schedule once live.
+
+### Connectivity distances
+
+Every distance to Kolkata, Haldia Port, NSCBI Airport and the nearest rail
+siding is estimated. **These close deals** — a buyer who drives it and finds the
+number wrong stops trusting the rest of the page. Measure them properly.
+
+Highway designations (`NH-16 · Kona Expressway`, `Amta Road (SH-15)`) also need
+confirming.
+
+---
+
+## Scale comparator — `content/scale.ts`
+
+| Item | Generated value | Note |
+|---|---|---|
+| Dock bays per acre | **17** | Drives every bay figure in the signature scene |
+| 5 / 20 / 100 acre bay counts | **85 / 340 / 1,700** | Derived from the ratio above |
+
+Fixing the ratio fixes all four steps. Acreage-to-sq-ft is real arithmetic
+(43,560) and needs no checking.
+
+---
+
+## Build-to-suit specs — `content/buildToSuit.ts`
+
+Clear span **24–40 m** · eave height **9–14 m** · bay spacing **6–8 m** · floor
+load **5–10 T/sqm** · sheeting **0.5 mm PPGI** · levellers **6–12 T** · footing
+**M25**.
+
+These are the most credible content on the site and the easiest for the company
+to supply from its own drawings. Get the real ranges.
+
+---
+
+## Process durations — `content/site.ts` › `PROCESS`
+
+Every duration is invented, including **8–16 weeks for conversion and mutation**.
+
+That one is quoted as a differentiator. If the real range is longer, saying so
+is still stronger than the competition, who publish no timeline at all.
+
+---
+
+## Answers — `content/site.ts` › `QUESTIONS`
+
+Six answers assert policy: minimum parcel size, whether conversion is included,
+lease vs sale, build-to-lease. **These are commercial commitments, not
+marketing.** Management signs them off or they come down.
+
+---
+
+## Contact — `content/site.ts` › `COMPANY`
+
+**Phone is confirmed: `+91 98360 88855`.** WhatsApp uses the same number.
+
+**Email is still a placeholder** (`enquiry@jalanprojects.in`). Confirm it exists
+and is monitored, or remove the email link — a dead address on a live site loses
+enquiries silently.
+
+---
+
+## Logo
+
+`public/logo-jalan.jpg` is **244 × 274 px**, which is too small to stay crisp.
+It renders at 44px in the header, where it holds, but it cannot be used larger
+and cannot go on the dark register: knocking out the white field punches holes
+through the lion's muzzle and brow.
+
+**Ask for the original as SVG, or a PNG with real transparency at 1000px+.**
+Until then the footer carries a typographic wordmark instead of the crest.
+
+---
+
+## Imagery
+
+All footage is generated. Any page presenting a model as a specific real asset
+needs an `INDICATIVE VISUALISATION` label — the parks section carries one.
