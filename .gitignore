@@ -1,8 +1,13 @@
 node_modules/
 .next/
-out/
-build/
 .netlify/
+
+# Anchored with a leading slash, and they must stay that way. An unanchored
+# `build/` matches a directory of that name at ANY depth — which silently
+# swallowed public/media/seq/build, the hero's 210 frames, so the deployed
+# canvas had nothing to paint. Same trap waits for `out/`.
+/out/
+/build/
 .env*
 !.env.example
 next-env.d.ts
