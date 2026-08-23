@@ -11,8 +11,24 @@ gsap.registerPlugin(ScrollTrigger);
 /* -------------------------------------------------------------------------- */
 /* Snap tuning                                                                 */
 
-/** How long a committed step takes. Long enough to read as travel. */
-const STEP_DURATION = 0.85;
+/**
+ * Frames per second a committed step aims to play at.
+ *
+ * Duration is derived from this, not fixed. The stages of the hero are spaced
+ * to the footage rather than evenly, so a fixed duration gave one step 44
+ * frames and the next 10 — a fourfold swing in smoothness between one gesture
+ * and the next, which is precisely the unevenness that reads as unpolished.
+ * Holding the rate and varying the duration trades a difference nobody can see
+ * for one everybody can.
+ */
+const STEP_FPS = 44;
+/** Floor and ceiling on that. Short steps must not feel abrupt, long ones must
+    not feel like waiting. */
+const STEP_MIN = 0.38;
+const STEP_MAX = 1.05;
+/** For groups that are not film — the horizontal parks — there are no frames to
+    pace to, so distance stands in. Roughly a viewport per second. */
+const STEP_PX_PER_SECOND = 900;
 /** Pause after arriving before another gesture can commit. Stops one long
     wheel spin from firing four steps back to back. */
 const STEP_COOLDOWN = 90;
@@ -29,7 +45,30 @@ const SETTLE_REACH = 0.12;
 /** Below this it is not worth moving at all. */
 const SETTLE_MIN = 6;
 
+/** Fast to settle, and used for the short corrective nudges. */
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+/**
+ * Eased at both ends, and used for every committed step.
+ *
+ * A step commits on the first scroll event of a gesture, when the page has
+ * barely begun to move. An ease-out starts at its maximum velocity, so against
+ * that near-standstill it reads as a yank — the single most unpolished moment
+ * in the whole sequence. Easing in as well costs a few frames at the start and
+ * removes it.
+ */
+const easeInOutCubic = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/** Seconds a step should take to cross `distance` within `group`. */
+function stepDuration(group: { from: number; to: number; frameSpan?: number }, distance: number) {
+  const span = Math.abs(group.to - group.from);
+  const seconds =
+    group.frameSpan && span > 0
+      ? (Math.abs(distance) / span) * group.frameSpan / STEP_FPS
+      : Math.abs(distance) / STEP_PX_PER_SECOND;
+  return Math.min(STEP_MAX, Math.max(STEP_MIN, seconds));
+}
 
 /* -------------------------------------------------------------------------- */
 
@@ -151,9 +190,13 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       const y = window.scrollY;
 
       let target: number | null = null;
+      let duration = STEP_MIN;
       for (const group of stepGroupsAt(y, window.innerHeight * STEP_LEAD)) {
         target = nextStep(group, y, direction);
-        if (target !== null) break;
+        if (target !== null) {
+          duration = stepDuration(group, target - y);
+          break;
+        }
       }
 
       // Nothing ahead in any group covering this position: the visitor is at
@@ -162,8 +205,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
       snapping = true;
       lenis.scrollTo(target, {
-        duration: STEP_DURATION,
-        easing: easeOutCubic,
+        duration,
+        easing: easeInOutCubic,
         // The whole point: once a gesture has committed to a stage, further
         // input does not divert it. Without this a trackpad's tail end
         // interrupts the step halfway and leaves the caption mid-fade.

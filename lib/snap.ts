@@ -26,6 +26,17 @@ export type StepGroup = {
   /** Bounds of the committed region. */
   from: number;
   to: number;
+  /**
+   * How many frames the group's range spans, when it is film.
+   *
+   * A step is only as smooth as the number of frames it gets to show. The
+   * hero's stages are not evenly spaced — they are tuned to the footage — so a
+   * single fixed step duration means one step plays 44 frames and the next
+   * plays 10, and the second looks broken next to the first. Given this, the
+   * engine can hold the frame rate constant and let the duration vary instead,
+   * which is the way round that a viewer actually notices.
+   */
+  frameSpan?: number;
 };
 
 type StepProvider = () => StepGroup | null;

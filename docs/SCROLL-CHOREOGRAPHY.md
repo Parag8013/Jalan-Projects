@@ -30,20 +30,35 @@ scroll-video site actually ships. `scripts/prepare-media.sh` turns a Flow export
 
 | | Approach |
 |---|---|
-| **Scrubbed** (assembly, orbit, interior) | ~210 frames at 1200px, painted to `<canvas>` on scroll |
+| **Scrubbed** (assembly, orbit, interior) | ~210 frames at 1200px, painted to `<canvas>` on scroll, `scrub: 0.25` |
 | **Ambient** (land, close) | `<video muted playsinline loop>`, fetched only as its section approaches |
 | **Mobile, all scenes** | The clip itself, played once on entry. No sequence is ever downloaded |
 
-### Two details in `ScrubSequence` that matter
+### Three details in `ScrubSequence` that matter
 
 **Frames load coarse-to-fine, not in order.** Requesting 0, 1, 2… means the last third of the scene
 is still missing when a fast scroller reaches it. The loader walks the strip at stride 8, then 4,
 then 2, then 1 — so after roughly an eighth of the bytes the whole scrub is already covered at a low
 frame rate, and everything after that just fills in.
 
-**A missing frame paints its nearest decoded neighbour.** Without that the canvas holds the last
-frame it managed to draw, and a fast scroll through a half-loaded sequence freezes instead of
-running rough. Degrading to a lower frame rate is always better than degrading to a still.
+**A missing frame paints its nearest decoded neighbour**, and asks for itself out of turn. Without
+the fallback the canvas holds the last frame it managed to draw, and a fast scroll through a
+half-loaded sequence freezes instead of running rough — degrading to a lower frame rate is always
+better than degrading to a still. Without the demand request, the frame the visitor is actually
+looking at waits its turn behind two hundred it cannot see.
+
+**No more than twelve requests are in flight at once.** This is the one that decides whether the
+coarse pass means anything. Firing all 210 at once looks like it must be fastest and over HTTP/2 it
+is the opposite: the server round-robins every open stream, so the last frame requested lands at
+about the moment the first does, and the ordering above buys nothing at all.
+
+| Against the deployed CDN | |
+|---|---|
+| All 210 in parallel | **3027 ms** before the strip is covered |
+| 27-frame coarse pass, twelve at a time | **350 ms** |
+
+Same bytes, same order. The only difference is the constraint — and three seconds of nearest-
+neighbour fallback at the top of the page is most of what "unpolished" means.
 
 ### And one in `prepare-media.sh`
 
@@ -108,6 +123,21 @@ drags it back toward its own internal target, and the two fight visibly. Every s
 `lenis.scrollTo` instead, so only one thing is ever moving the page.
 
 ### Three details that decide whether it feels right
+
+**Every step plays at the same frame rate.** Duration is derived from the number of frames a step
+crosses, not fixed. The hero's stages are spaced to the footage rather than evenly, so one fixed
+duration gave one step 44 frames and the next 10 — a fourfold swing in smoothness between one
+gesture and the next, which is exactly the unevenness that reads as cheap. Holding the rate at 44
+fps and letting the duration vary between 0.38 s and 1.05 s trades a difference nobody can see for
+one everybody can.
+
+| | before | after |
+|---|---|---|
+| Hero, effective fps per step | 12 · 25 · 44 · 25 · 42 · 52 · 27 · 20 | 28 · 44 · 44 · 44 · 44 · 44 · 44 · 44 |
+
+**A step eases in as well as out.** It commits on the first scroll event of a gesture, when the page
+has barely begun to move; an ease-out starts at maximum velocity, and against that near-standstill
+it reads as a yank.
 
 **A stop sits after a caption's cue, not on it.** A cue is where a caption *begins* fading in, so
 resting exactly there lands on the worst frame in the scene: the incoming caption at zero opacity,
