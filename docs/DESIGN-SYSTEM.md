@@ -232,27 +232,14 @@ caught presenting a generated warehouse as a real one costs everything.
 
 ## 6. Motion
 
-**Library:** GSAP 3.13 + `@gsap/react` (`useGSAP`) + ScrollTrigger, with Lenis for smooth scroll.
+**Library:** GSAP 3.13 + `@gsap/react` (`useGSAP`) + ScrollTrigger. Scroll is native — there is no
+smooth-scroll library. See SCROLL-CHOREOGRAPHY.md § Scroll is native.
 As of GSAP 3.13 the former Club plugins (SplitText, Flip, DrawSVG, ScrollSmoother) are free —
 verify licensing terms at build time. The boundary draws use plain `stroke-dashoffset` regardless,
 so they carry no plugin dependency.
 
-### Lenis config
-
-```js
-new Lenis({ lerp: 0.09, wheelMultiplier: 1, syncTouch: false, autoRaf: false })
-```
-
 `syncTouch: false` is deliberate — native momentum on touch is smoother than a synced emulation,
 and syncTouch is the usual cause of janky mobile scroll on sites like this.
-
-### Lenis ↔ ScrollTrigger wiring
-
-```js
-lenis.on('scroll', ScrollTrigger.update);
-gsap.ticker.add((time) => lenis.raf(time * 1000));
-gsap.ticker.lagSmoothing(0);
-```
 
 ### Motion budget
 
@@ -283,7 +270,7 @@ separates this from a showreel.
 
 ### Reduced motion
 
-Wrap everything in `gsap.matchMedia()`. Under `prefers-reduced-motion: reduce`: Lenis does not
+Wrap everything in `gsap.matchMedia()`. Under `prefers-reduced-motion: reduce`: motion does not
 initialise, all boundaries and brackets render in their final state, counters show final values, no
 pins, no scrubs, no parallax. Opacity-only fades at 200ms are retained — the page should still feel
 alive, just not kinetic.

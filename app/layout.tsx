@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Fraunces, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
-import SmoothScroll from '@/components/motion/SmoothScroll';
+import ScrollRoot from '@/components/motion/ScrollRoot';
 import './globals.css';
 
 /**
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body>
         <div className="drafting-grid" aria-hidden="true" />
-        <SmoothScroll>{children}</SmoothScroll>
+        <ScrollRoot>{children}</ScrollRoot>
       </body>
     </html>
   );

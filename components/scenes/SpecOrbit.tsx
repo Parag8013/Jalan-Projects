@@ -5,7 +5,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import ScrubSequence from '@/components/motion/ScrubSequence';
-import { restPoints } from '@/lib/snap';
 import { EAVE_RANGE, FRAME_STAGES, SPAN_RANGE } from '@/content/buildToSuit';
 import { media } from '@/lib/media';
 
@@ -13,21 +12,6 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export const ORBIT_FRAMES = 210;
 
-/**
- * One stop per row of the specification sheet, matching the timings the rows
- * fade in on below — 0.12 plus an even share of the middle 0.66 — plus the
- * held final frame. Change one and change the other, or a gesture lands
- * between two rows.
- */
-const STOPS = [
-  0,
-  ...restPoints(
-    FRAME_STAGES.map((_, i) => 0.12 + (0.66 * i) / FRAME_STAGES.length),
-    // The row's bar is the slowest thing to arrive, at 0.05.
-    0.065,
-  ),
-  1,
-] as const;
 
 /**
  * Scene 6 — the specification.
@@ -101,7 +85,6 @@ export default function SpecOrbit() {
         poster={media('/media/orbit-poster.jpg')}
         video={media('/media/orbit.mp4')}
         end="+=340%"
-        snapAt={STOPS}
         onProgress={(p) => tl.current?.progress(p)}
       >
         <div className="vignette" aria-hidden="true" />

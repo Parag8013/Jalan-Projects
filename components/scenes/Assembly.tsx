@@ -5,7 +5,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import ScrubSequence from '@/components/motion/ScrubSequence';
-import { restPoints } from '@/lib/snap';
 import { COMPANY, LEADERSHIP } from '@/content/site';
 import { REFERENCE } from '@/content/buildToSuit';
 import { media } from '@/lib/media';
@@ -75,17 +74,6 @@ const BEATS = [
 /** Where the assembly ends and the orbit loop takes the background. */
 const HANDOFF = 0.93;
 
-/**
- * Where a gesture is allowed to leave the visitor: on a stage, never between
- * two.
- *
- * A leading 0 keeps the top of the page — the hero, before the build starts —
- * a valid place to stand. The trailing 1 is the finished building with the
- * completion card up, the last stop before the pin releases.
- *
- * 0.05 clears the captions' 0.03 fade-in with a little to spare.
- */
-const STOPS = [0, ...restPoints(BEATS.map((b) => b.at), 0.05), 1] as const;
 
 /* -------------------------------------------------------------------------- */
 
@@ -187,7 +175,6 @@ export default function Assembly() {
         poster={media('/media/build-poster.jpg')}
         video={media('/media/build.mp4')}
         end="+=560%"
-        snapAt={STOPS}
         onProgress={onProgress}
       >
         {/* The orbit loop. Sits over the scrubbed canvas and fades up as the

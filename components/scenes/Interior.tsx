@@ -5,7 +5,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import ScrubSequence from '@/components/motion/ScrubSequence';
-import { restPoints } from '@/lib/snap';
 import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -45,12 +44,6 @@ const HANDOVER = [
   },
 ] as const;
 
-/**
- * A stop on the scene's opening frame, one per handover figure, and the closing
- * statement. 0.08 clears the card's 0.045 fade-in and the rule that draws
- * under it, which finishes at 0.07.
- */
-const STOPS = [0, ...restPoints(HANDOVER.map((h) => h.at), 0.08), 0.95] as const;
 
 /**
  * Scene 7 — handover.
@@ -125,7 +118,6 @@ export default function Interior() {
         poster={media('/media/interior-poster.jpg')}
         video={media('/media/interior.mp4')}
         end="+=300%"
-        snapAt={STOPS}
         onProgress={(p) => tl.current?.progress(p)}
       >
         <div className="vignette" aria-hidden="true" />

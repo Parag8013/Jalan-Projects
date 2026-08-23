@@ -5,7 +5,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { MOTION_CONTEXTS } from '@/lib/motion';
-import { registerStepGroup } from '@/lib/snap';
 import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -28,15 +27,19 @@ const MAX_IN_FLIGHT = 12;
 /**
  * Scrub smoothing, in seconds.
  *
- * Lenis already smooths the scroll position and the snap engine already eases
- * every step, so this is a third layer of smoothing on an-already smooth
- * signal. At the old 0.7 the film arrived 0.7s after the page had stopped
- * moving — a step took 0.85s and then the canvas crawled the last few frames
- * for another beat. That trailing crawl is what reads as sluggish rather than
- * smooth. Small enough to feel attached to the scroll, large enough to absorb
- * update jitter.
+ * With smooth scrolling gone this is the only easing left in the chain, and it
+ * is applied in the right place. A mouse wheel notch moves the page ~100px
+ * instantly, which at this sequence's density is five frames at once; without
+ * smoothing the film would step rather than move.
+ *
+ * The distinction that matters: this eases the *picture* toward the scroll
+ * position, it does not ease the scroll position itself. The page still lands
+ * exactly where the visitor put it, on the frame they put it there — only the
+ * canvas takes a moment to catch up, and nothing about pinning or layout
+ * depends on it. That is why it cannot produce the lag a smooth-scroll library
+ * can.
  */
-const SCRUB = 0.25;
+const SCRUB = 0.4;
 
 type Props = {
   /** Folder under /media/seq. Frames are `0001.jpg` upward. */
@@ -48,13 +51,6 @@ type Props = {
   video?: string;
   /** Scroll distance the scrub occupies, as a ScrollTrigger `end`. */
   end?: string;
-  /**
-   * Progress fractions the scene should come to rest on, ascending, normally
-   * the same `at` values the captions use. Supplying them makes the scene
-   * committed: one gesture travels to the next one and cannot be diverted.
-   * Include 1 so the last gesture leaves cleanly.
-   */
-  snapAt?: readonly number[];
   /** 0→1. Fires on the desktop scrub and on the mobile timed run. */
   onProgress?: (p: number) => void;
   /** 0→1 decode progress, for a loading readout. */
@@ -84,7 +80,6 @@ export default function ScrubSequence({
   poster,
   video,
   end = '+=300%',
-  snapAt,
   onProgress,
   onLoad,
   children,
@@ -218,21 +213,6 @@ export default function ScrubSequence({
           },
         });
 
-        // Published as a function, not a value: `st.start` and `st.end` move
-        // on every refresh, and reading them at the moment of the gesture
-        // means there is no cache to invalidate.
-        const unregister = registerStepGroup(() =>
-          snapAt && snapAt.length > 1
-            ? {
-                from: st.start,
-                to: st.end,
-                points: snapAt.map((a) => st.start + a * (st.end - st.start)),
-                // Lets the snap engine hold a constant frame rate across
-                // steps of very different lengths.
-                frameSpan: frameCount,
-              }
-            : null,
-        );
 
         const onResize = () => {
           painted.current = -1;
@@ -243,7 +223,6 @@ export default function ScrubSequence({
         return () => {
           warm.kill();
           st.kill();
-          unregister();
           window.removeEventListener('resize', onResize);
         };
       });
@@ -278,7 +257,7 @@ export default function ScrubSequence({
 
       return () => mm.revert();
     },
-    { scope: root, dependencies: [frameCount, seq, snapAt] },
+    { scope: root, dependencies: [frameCount, seq] },
   );
 
   return (

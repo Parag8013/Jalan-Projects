@@ -30,7 +30,7 @@ scroll-video site actually ships. `scripts/prepare-media.sh` turns a Flow export
 
 | | Approach |
 |---|---|
-| **Scrubbed** (assembly, orbit, interior) | ~210 frames at 1200px, painted to `<canvas>` on scroll, `scrub: 0.25` |
+| **Scrubbed** (assembly, orbit, interior) | ~210 frames at 1200px, painted to `<canvas>` on scroll, `scrub: 0.4` |
 | **Ambient** (land, close) | `<video muted playsinline loop>`, fetched only as its section approaches |
 | **Mobile, all scenes** | The clip itself, played once on entry. No sequence is ever downloaded |
 
@@ -101,69 +101,27 @@ a viewport and nobody reads it.
 
 ---
 
-## Snapping
+## Scroll is native
 
-Scroll is quantised, but not uniformly — a page that treats a film and a column of prose the same way
-gets one of them wrong.
+Nothing intercepts it. A wheel notch moves the page by exactly what the operating system says,
+immediately, and the position the visitor lands on is the position they asked for.
 
-| Where | Behaviour |
-|---|---|
-| **Inside a pinned scene** | *Committed.* Any gesture hands the page to the next stop in that direction and the journey cannot be interrupted. One flick, one construction stage |
-| **Section boundaries** | *Magnetic.* Only pulls when the visitor has already stopped within 12 % of a viewport of a section top. Alignment, not transport |
-| **Everywhere else** | Free. A long section is read a screenful at a time, as it should be |
+This was not always true. The build carried Lenis for smooth scrolling and, later, a snapping engine
+that took each gesture and drove the page to the next stage of the film. Both are gone, and the
+reason is worth keeping because the snapping demoed well.
 
-Stops are registered by the scenes themselves (`lib/snap.ts`), as **functions rather than values** —
-every one is derived from a ScrollTrigger whose `start` and `end` move on each refresh, so reading
-them at the moment of the gesture means there is no cache to invalidate.
+**Smoothing the page means the scroll position is no longer the number the visitor asked for.** Every
+frame it is somewhere between where they were and where they are going, and every pin, every scrub
+and every fixed element is recomputed against that moving approximation. When the frame budget is
+free it is invisible. When something else on the frame is expensive — and painting a 1200px JPEG to a
+canvas every frame is expensive — it stops tracking the input, and the result reads as lag and
+stutter: exactly the failure it was there to prevent. Snapping compounded it, because a gesture that
+does something other than what the hand did is only pleasant while it is perfectly smooth.
 
-### Why not ScrollTrigger's own `snap`
-
-It snaps by animating the window's scroll position. Lenis reads that as external interference and
-drags it back toward its own internal target, and the two fight visibly. Every snap goes through
-`lenis.scrollTo` instead, so only one thing is ever moving the page.
-
-### Three details that decide whether it feels right
-
-**Every step plays at the same frame rate.** Duration is derived from the number of frames a step
-crosses, not fixed. The hero's stages are spaced to the footage rather than evenly, so one fixed
-duration gave one step 44 frames and the next 10 — a fourfold swing in smoothness between one
-gesture and the next, which is exactly the unevenness that reads as cheap. Holding the rate at 44
-fps and letting the duration vary between 0.38 s and 1.05 s trades a difference nobody can see for
-one everybody can.
-
-| | before | after |
-|---|---|---|
-| Hero, effective fps per step | 12 · 25 · 44 · 25 · 42 · 52 · 27 · 20 | 28 · 44 · 44 · 44 · 44 · 44 · 44 · 44 |
-
-**A step eases in as well as out.** It commits on the first scroll event of a gesture, when the page
-has barely begun to move; an ease-out starts at maximum velocity, and against that near-standstill
-it reads as a yank.
-
-**A stop sits after a caption's cue, not on it.** A cue is where a caption *begins* fading in, so
-resting exactly there lands on the worst frame in the scene: the incoming caption at zero opacity,
-the outgoing one half gone, nothing readable. `restPoints()` carries each stop past the end of the
-fade. It costs a few frames of footage and it is what makes every stop look composed.
-
-**Groups overlap deliberately, and the first one with somewhere to go wins.** A scene claims a
-lead-in of 0.35 of a viewport above its own start, so its opening frame is a stop rather than
-something the visitor is already past. Two scenes that sit against each other therefore overlap, and
-the outgoing one — which has no further stops to offer — would swallow the gesture and make the next
-scene's opening frame unreachable. The engine walks every group covering the position and takes the
-first that actually has a next stop.
-
-**The settle pass is the safety net under the step pass.** A step commits, arrives, and holds a
-90 ms cooldown; any wheel still in flight during that cooldown moves the page a few pixels off the
-stage with no gesture left to commit the next one. Coming to rest 16 px past a composed frame is
-exactly the not-quite the whole mechanism exists to remove, so at rest inside a scene the position
-is re-aligned to the nearest stop. Bounded to the scene's own range and not its lead-in — a visitor
-leaving upward is briefly still inside the lead zone, and re-aligning there would pull them back
-into a scene they have just decided to leave.
-
-### Where it is off
-
-Touch keeps its native momentum, and below 768 px the scenes are not pinned at all, so there is
-nothing to step through. Under `prefers-reduced-motion` Lenis never initialises and none of this
-runs.
+**Smoothing the film instead costs nothing and cannot fail that way.** `SCRUB` in `ScrubSequence`
+eases the canvas toward the scroll position; the scroll position itself stays honest and instant, and
+no layout depends on it. A wheel notch is ~100px, which at the hero's density is five frames at once,
+so some easing is needed for the picture not to step — but it belongs on the picture.
 
 ---
 
@@ -210,8 +168,11 @@ the film, which is what the site is for.
 
 ## Technical spec
 
-**One clock.** Lenis is driven from GSAP's ticker, so smooth scroll and every ScrollTrigger share a
-single rAF loop. Two separate loops is the usual cause of scrub jitter.
+**Native scroll, one rAF loop.** ScrollTrigger runs on the browser's own scroll events and GSAP's
+ticker. `ScrollRoot` sets `ignoreMobileResize` so that a mobile browser hiding its chrome does not
+re-measure every pin mid-scroll, and `lagSmoothing(0)` so GSAP does not clamp a large delta after a
+stall — scrubbed timelines are driven by scroll position, not elapsed time, so a clamp only
+desynchronises them from the page.
 
 **Overlays run off paused timelines that scroll scrubs.** A scene with seven cross-fading captions
 costs zero React re-renders. Each timeline is padded to a duration of exactly 1 with a trailing
@@ -231,4 +192,4 @@ Information never degrades across breakpoints. Only the choreography does.
 |---|---|
 | **Desktop / tablet** ≥ 768 px | Full choreography, sequences scrubbed |
 | **Mobile** ≤ 767 px | No sequence is downloaded. Each scrubbed scene plays its clip once on entry and runs the same overlay on a seven-second timer, so every figure still arrives. Parks stacks instead of pinning |
-| **`prefers-reduced-motion`** | Lenis never initialises. Every scene shows its poster and resolves every overlay to its final state. Nothing moves, nothing is missing |
+| **`prefers-reduced-motion`** | Every scene shows its poster and resolves every overlay to its final state. Nothing moves, nothing is missing |

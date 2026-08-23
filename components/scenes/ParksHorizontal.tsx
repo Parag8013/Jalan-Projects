@@ -6,7 +6,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { PARKS } from '@/content/site';
 import { MOTION_CONTEXTS, formatNumber } from '@/lib/motion';
-import { registerStepGroup } from '@/lib/snap';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -85,7 +84,7 @@ export default function ParksHorizontal() {
           });
         });
 
-        const progress = gsap.to('[data-progress]', {
+        gsap.to('[data-progress]', {
           scaleX: 1,
           ease: 'none',
           scrollTrigger: {
@@ -96,26 +95,6 @@ export default function ParksHorizontal() {
           },
         });
 
-        // One stop per park. The track travels `distance` across the pin, so a
-        // panel is square in the frame when the pin's progress equals that
-        // panel's own offset along the track.
-        const unregister = registerStepGroup(() => {
-          const st = progress.scrollTrigger;
-          const span = distance();
-          if (!st || span <= 0) return null;
-
-          const range = st.end - st.start;
-          const points = panels.map((panel) =>
-            Math.round(st.start + Math.min(1, panel.offsetLeft / span) * range),
-          );
-          // The pin's own end, so the last gesture leaves rather than sticking
-          // on the final panel.
-          points.push(st.end);
-
-          return { from: st.start, to: st.end, points };
-        });
-
-        return () => unregister();
       });
 
       // Tablet and mobile: stacked, each panel animates on its own entry.
