@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { MOTION_CONTEXTS } from '@/lib/motion';
 import { registerStepGroup } from '@/lib/snap';
+import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -70,7 +71,7 @@ export default function ScrubSequence({
   const wanted = useRef(0);
 
   const src = useCallback(
-    (i: number) => `/media/seq/${seq}/${String(i + 1).padStart(4, '0')}.jpg`,
+    (i: number) => media(`/media/seq/${seq}/${String(i + 1).padStart(4, '0')}.jpg`),
     [seq],
   );
 

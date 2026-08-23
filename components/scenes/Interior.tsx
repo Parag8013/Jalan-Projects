@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import ScrubSequence from '@/components/motion/ScrubSequence';
 import { restPoints } from '@/lib/snap';
+import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -121,10 +122,10 @@ export default function Interior() {
       <ScrubSequence
         seq="interior"
         frameCount={INTERIOR_FRAMES}
-        poster="/media/interior-poster.jpg"
-        video="/media/interior.mp4"
+        poster={media('/media/interior-poster.jpg')}
+        video={media('/media/interior.mp4')}
         end="+=300%"
-      snapAt={STOPS}
+        snapAt={STOPS}
         onProgress={(p) => tl.current?.progress(p)}
       >
         <div className="vignette" aria-hidden="true" />

@@ -7,6 +7,7 @@ import { useGSAP } from '@gsap/react';
 import AmbientScene from '@/components/motion/AmbientScene';
 import RevealText from '@/components/motion/RevealText';
 import { formatNumber } from '@/lib/motion';
+import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -67,7 +68,7 @@ export default function Land() {
   );
 
   return (
-    <AmbientScene src="/media/loop-land.mp4" poster="/media/loop-land-poster.jpg" id="land">
+    <AmbientScene src={media('/media/loop-land.mp4')} poster={media('/media/loop-land-poster.jpg')} id="land">
       <div ref={root}>
         <p className="label text-gold">05 · Sourcing</p>
 

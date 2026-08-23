@@ -8,6 +8,7 @@ import ScrubSequence from '@/components/motion/ScrubSequence';
 import { restPoints } from '@/lib/snap';
 import { COMPANY, LEADERSHIP } from '@/content/site';
 import { REFERENCE } from '@/content/buildToSuit';
+import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -183,10 +184,10 @@ export default function Assembly() {
       <ScrubSequence
         seq="build"
         frameCount={BUILD_FRAMES}
-        poster="/media/build-poster.jpg"
-        video="/media/build.mp4"
+        poster={media('/media/build-poster.jpg')}
+        video={media('/media/build.mp4')}
         end="+=560%"
-      snapAt={STOPS}
+        snapAt={STOPS}
         onProgress={onProgress}
       >
         {/* The orbit loop. Sits over the scrubbed canvas and fades up as the
@@ -195,14 +196,14 @@ export default function Assembly() {
         <video
           ref={loop}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0 will-change-[opacity] motion-reduce:hidden"
-          poster="/media/orbit-poster.jpg"
+          poster={media('/media/orbit-poster.jpg')}
           muted
           loop
           playsInline
           preload="none"
           aria-hidden="true"
         >
-          <source src="/media/orbit.mp4" type="video/mp4" />
+          <source src={media('/media/orbit.mp4')} type="video/mp4" />
         </video>
 
         <div className="vignette" aria-hidden="true" />

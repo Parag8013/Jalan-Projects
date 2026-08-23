@@ -7,6 +7,7 @@ import { useGSAP } from '@gsap/react';
 import ScrubSequence from '@/components/motion/ScrubSequence';
 import { restPoints } from '@/lib/snap';
 import { EAVE_RANGE, FRAME_STAGES, SPAN_RANGE } from '@/content/buildToSuit';
+import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -97,10 +98,10 @@ export default function SpecOrbit() {
       <ScrubSequence
         seq="orbit"
         frameCount={ORBIT_FRAMES}
-        poster="/media/orbit-poster.jpg"
-        video="/media/orbit.mp4"
+        poster={media('/media/orbit-poster.jpg')}
+        video={media('/media/orbit.mp4')}
         end="+=340%"
-      snapAt={STOPS}
+        snapAt={STOPS}
         onProgress={(p) => tl.current?.progress(p)}
       >
         <div className="vignette" aria-hidden="true" />

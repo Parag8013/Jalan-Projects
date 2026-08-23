@@ -227,7 +227,23 @@ then edit the `at` values in the `BEATS` table at the top of `components/scenes/
 Do the same for `HANDOVER` in `Interior.tsx` if the four figures drift out of step with what the
 camera is passing.
 
-### Step 3 — check the weight
+### Step 3 — bump `MEDIA_VERSION`
+
+One character in `lib/media.ts`. Do not skip it.
+
+`vercel.json` caches everything under `/media` for 30 days, which is right for
+frames that never change — but only if the URL changes when the bytes do.
+Overwrite the footage without bumping the stamp and every browser that has been
+to the site in the last month keeps serving the old frames from disk, and serves
+a *mix* of old and new as individual entries expire at different times. A
+half-old scrub looks far worse than a missing one.
+
+The same header caches a 404 just as eagerly. That is how the hero's frames
+stayed invisible after they were restored to the deploy: the files were correct
+at the origin, and every browser that had already visited went on believing they
+were not there.
+
+### Step 4 — check the weight
 
 ```bash
 du -sh public/media

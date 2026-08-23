@@ -135,3 +135,8 @@ case "$MODE" in
 esac
 
 echo "public/media is now $(du -sh "$OUT" | cut -f1)"
+echo
+echo "  ! Bump MEDIA_VERSION in lib/media.ts before deploying."
+echo "    /media is cached for 30 days. Without a new stamp, everyone who has"
+echo "    visited in the last month keeps the old footage — or worse, a mix."
+echo

@@ -7,6 +7,7 @@ import { useGSAP } from '@gsap/react';
 import AmbientScene from '@/components/motion/AmbientScene';
 import RevealText from '@/components/motion/RevealText';
 import { COMPANY, PARKS, PROCESS, QUESTIONS, SECTORS } from '@/content/site';
+import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -266,8 +267,8 @@ export function Questions() {
 export function Close() {
   return (
     <AmbientScene
-      src="/media/loop-close.mp4"
-      poster="/media/loop-close-poster.jpg"
+      src={media('/media/loop-close.mp4')}
+      poster={media('/media/loop-close-poster.jpg')}
       scrim="heavy"
       id="enquiry"
       className="min-h-svh"
