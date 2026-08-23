@@ -1,40 +1,63 @@
-import { COMPANY, PARKS } from '@/content/site';
+import { COMPANY, LEADERSHIP, PARKS } from '@/content/site';
 
 /**
- * Footer. The crest's white field cannot sit on the ink ground — knocking it
- * out punched holes through the lion's muzzle — so the mark here is
- * typographic. It reads as more considered than a logo in a box would.
+ * Footer.
+ *
+ * The crest is set larger here than in the header, above the wordmark rather
+ * than beside it. The header has to stay out of the way of the film; the footer
+ * is the one place on the page where the mark can simply be the mark.
+ *
+ * `public/crest.png` is `public/logo-jalan.jpg` with its white field keyed out.
+ * The JPEG itself cannot go on a dark ground, and a plain `-transparent white`
+ * knockout punches holes through the lion's muzzle and leaves a grey halo of
+ * JPEG ringing. It needs a soft matte off the darkest channel instead:
+ *
+ *   magick public/logo-jalan.jpg -colorspace sRGB  *     \( +clone -channel RGB -separate -evaluate-sequence min  *        -negate -level 9%,40% \)  *     -alpha off -compose CopyOpacity -composite -trim +repage  *     -strip -dither None -colors 64 public/crest.png
+ *
+ * The 9% floor is what kills the halo — measure it before changing it, the
+ * supplied JPEG carries up to 7.5% alpha of near-white in the background.
  */
 export default function Footer() {
   return (
-    <footer className="relative z-10 bg-ink px-[var(--spacing-gutter)] py-[clamp(56px,8vw,104px)] text-paper">
+    <footer className="grain relative z-10 border-t border-edge bg-void px-[var(--spacing-gutter)] py-[clamp(56px,8vw,104px)]">
       <div className="mx-auto w-full max-w-[1440px]">
         <div className="grid gap-x-12 gap-y-14 lg:grid-cols-[1.2fr_1fr_1fr]">
           <div>
-            <p className="display text-[length:var(--text-display-s)]">
-              Jalan <span className="accent-italic text-gold">Projects</span>
+            <img
+              src="/crest.png"
+              alt=""
+              width={186}
+              height={241}
+              className="mb-6 h-16 w-auto select-none"
+              draggable={false}
+            />
+            <p className="display text-[length:var(--text-display-s)] text-white">
+              Jalan <span className="accent-italic">Projects</span>
             </p>
-            <p className="mt-5 max-w-[34ch] text-[0.9375rem] leading-relaxed text-white/65">
+            <p className="mt-5 max-w-[34ch] text-[0.9375rem] leading-relaxed text-mist">
               Industrial land and infrastructure across West Bengal. Sourcing, developed park
               plots, and facilities built to specification.
             </p>
             <span className="mt-8 block h-px w-16 bg-gold" />
+
+            <p className="mt-7 text-[0.9375rem] text-white">{LEADERSHIP.ceo.name}</p>
+            <p className="label mt-1 text-ash">{LEADERSHIP.ceo.role}</p>
           </div>
 
           <div>
-            <p className="label text-white/50">Parks</p>
+            <p className="label text-gold">Parks</p>
             <ul className="mt-5 space-y-4">
               {PARKS.map((p) => (
                 <li key={p.slug}>
                   <p className="text-[0.9375rem]">{p.name}</p>
-                  <p className="label mt-1 text-white/50">{p.place}</p>
+                  <p className="label mt-1 text-ash">{p.place}</p>
                 </li>
               ))}
             </ul>
           </div>
 
           <div>
-            <p className="label text-white/50">Enquiries</p>
+            <p className="label text-gold">Enquiries</p>
             <ul className="mt-5 space-y-4">
               <li>
                 <a
@@ -47,7 +70,7 @@ export default function Footer() {
               <li>
                 <a
                   href={`https://wa.me/${COMPANY.whatsapp}`}
-                  className="text-[0.9375rem] text-white/80 transition-colors duration-200 hover:text-gold"
+                  className="text-[0.9375rem] text-mist transition-colors duration-200 hover:text-gold"
                 >
                   WhatsApp
                 </a>
@@ -55,21 +78,21 @@ export default function Footer() {
               <li>
                 <a
                   href={`mailto:${COMPANY.email}`}
-                  className="text-[0.9375rem] text-white/80 transition-colors duration-200 hover:text-gold"
+                  className="text-[0.9375rem] text-mist transition-colors duration-200 hover:text-gold"
                 >
                   {COMPANY.email}
                 </a>
               </li>
-              <li className="label pt-2 text-white/50">{COMPANY.base}</li>
+              <li className="label pt-2 text-ash">{COMPANY.base}</li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-white/12 pt-7">
-          <p className="label text-white/40">
+        <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-edge pt-7">
+          <p className="label text-ash">
             © {new Date().getFullYear()} {COMPANY.name}
           </p>
-          <p className="label text-white/40">Site imagery is indicative visualisation</p>
+          <p className="label text-ash">Site imagery is indicative visualisation</p>
         </div>
       </div>
     </footer>

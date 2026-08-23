@@ -11,9 +11,53 @@
 export const COMPANY = {
   name: 'Jalan Projects',
   base: 'Howrah, West Bengal',
+  /** ⚠ GENERATED. Confirm the actual year of establishment. */
+  founded: 1998,
   phone: '+91 98360 88855',
   whatsapp: '919836088855',
   email: 'enquiry@jalanprojects.in',
+} as const;
+
+/**
+ * Leadership.
+ *
+ * The name and role are supplied and correct. Everything under `principles` is
+ * written in the company's voice on purpose — no sentence on this site is
+ * attributed to Mr Jalan personally, because a quotation put into a named
+ * person's mouth by a website builder is not a placeholder that can be quietly
+ * shipped. If a signed statement is wanted, get the words from him and add them
+ * as `LEADERSHIP.ceo.statement`.
+ */
+export const LEADERSHIP = {
+  ceo: {
+    name: 'Brij Mohan Jalan',
+    role: 'Chief Executive Officer',
+    base: 'Howrah, West Bengal',
+    /** Real words only. Leave null until they exist. */
+    statement: null as string | null,
+  },
+  principles: [
+    {
+      title: 'Own the difficult stage',
+      detail:
+        'Conversion of land use and mutation of records are where most land deals stall. They sit inside our scope, before possession, not in a note handed to you afterwards.',
+    },
+    {
+      title: 'Deal with the landholder directly',
+      detail:
+        'Terms are agreed with whoever holds the land. No intermediaries between us and the title, and no layered commissions arriving late in a transaction.',
+    },
+    {
+      title: 'Build to the operation, not to a catalogue',
+      detail:
+        'Span, eave height, dock count and floor loading come from the racking, equipment and vehicles that will actually use the building.',
+    },
+    {
+      title: 'One firm, start to finish',
+      detail:
+        'Sourcing, title, conversion, development and construction under one roof. A single point of responsibility from first brief to handover.',
+    },
+  ],
 } as const;
 
 /** Headline scale figures. Shown as counters in the scale band. */

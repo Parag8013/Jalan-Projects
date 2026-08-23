@@ -12,26 +12,28 @@ type Props = {
   src: string;
   poster: string;
   children: React.ReactNode;
-  /** `light` washes to warm cream with ink type. `dark` inverts to the near-black ground. */
-  tone?: 'light' | 'dark';
   id?: string;
   className?: string;
+  /** How hard the scrim sits on the footage. Raise it under dense copy. */
+  scrim?: 'light' | 'heavy';
 };
 
 /**
- * Full-bleed ambient video with an overlay layer.
+ * Full-bleed looping footage with an overlay layer.
  *
  * The clip carries mood and camera movement; the children carry the facts.
- * Video is not fetched until the section reaches the viewport and pauses when
- * it leaves — several clips decoding at once froze the renderer outright.
+ *
+ * The video is not fetched until the section reaches the viewport and pauses
+ * when it leaves. Several clips decoding at once froze the renderer outright,
+ * and on a page with this much footage that is not a theoretical risk.
  */
 export default function AmbientScene({
   src,
   poster,
   children,
-  tone = 'light',
   id,
   className = '',
+  scrim = 'light',
 }: Props) {
   const root = useRef<HTMLElement>(null);
   const video = useRef<HTMLVideoElement>(null);
@@ -58,9 +60,14 @@ export default function AmbientScene({
         });
 
         gsap.to('[data-parallax]', {
-          yPercent: 7,
+          yPercent: 8,
           ease: 'none',
-          scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: true },
+          scrollTrigger: {
+            trigger: root.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          },
         });
       }
 
@@ -76,18 +83,13 @@ export default function AmbientScene({
     { scope: root },
   );
 
-  const wash =
-    tone === 'dark'
-      ? 'bg-gradient-to-b from-ink/95 via-ink/88 to-ink/97'
-      : 'bg-gradient-to-b from-paper/94 via-paper/78 to-paper/96';
-
   return (
     <section
       ref={root}
       id={id}
-      className={`relative z-10 overflow-hidden ${tone === 'dark' ? 'bg-ink text-white' : 'bg-paper text-ink'} ${className}`}
+      className={`grain relative z-10 overflow-hidden bg-void ${className}`}
     >
-      <div data-parallax className="absolute inset-0 -top-[7%] h-[114%]">
+      <div data-parallax className="absolute inset-0 -top-[8%] h-[116%]">
         <video
           ref={video}
           className="h-full w-full object-cover motion-reduce:hidden"
@@ -108,7 +110,18 @@ export default function AmbientScene({
         />
       </div>
 
-      <div aria-hidden="true" className={`absolute inset-0 ${wash}`} />
+      <div className="vignette" aria-hidden="true" />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            scrim === 'heavy'
+              ? 'linear-gradient(to bottom, rgba(7,7,10,0.9), rgba(7,7,10,0.82) 45%, rgba(7,7,10,0.94))'
+              : 'linear-gradient(to bottom, rgba(7,7,10,0.82), rgba(7,7,10,0.6) 45%, rgba(7,7,10,0.9))',
+        }}
+      />
+
       <div className="relative px-[var(--spacing-gutter)] py-[var(--spacing-section)]">
         <div className="mx-auto w-full max-w-[1440px]">{children}</div>
       </div>

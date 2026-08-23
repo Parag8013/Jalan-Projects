@@ -67,3 +67,22 @@ export const FRAME_STAGES: Stage[] = [
 /** Geometry the configurability beat scrubs between. */
 export const SPAN_RANGE = { min: 24, max: 40, unit: 'm' } as const;
 export const EAVE_RANGE = { min: 9, max: 14, unit: 'm' } as const;
+
+/**
+ * The reference building — the one the hero footage assembles.
+ *
+ * These are quoted on screen beside the film, so the thing the visitor watches
+ * being built has to be the thing the specification describes. If the real
+ * ranges above change, change these with them, and say so in the Flow prompt so
+ * the next generation matches.
+ */
+export const REFERENCE = {
+  span: 30,
+  eave: 12,
+  ridge: 15.5,
+  bays: 8,
+  bay: 7.5,
+  get length() {
+    return this.bays * this.bay;
+  },
+} as const;

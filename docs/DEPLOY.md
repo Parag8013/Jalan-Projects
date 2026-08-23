@@ -4,13 +4,21 @@
 
 | | Size | Files |
 |---|---|---|
-| `public/media` — 8 graded clips + posters | 11 MB | 15 |
-| `public/frames/m5` — scrub sequence | 10 MB | 192 |
-| **Total in repo** | **~21 MB** | 207 |
+| `public/media/seq` — 3 scrub sequences | ~23 MB | 612 |
+| `public/media` — 5 clips + posters | ~14 MB | 12 |
+| **Total in repo** | **~37 MB** | ~625 |
 
-`media/` (52 MB of raw Flow exports) is gitignored. It is source material, not
-deployed — but it is what you re-grade from, so **back it up somewhere outside the
-repo.** Losing it means regenerating in Flow.
+Almost all of it is the three frame sequences, and they are the reason the scrubbed
+scenes are smooth — see `SCROLL-CHOREOGRAPHY.md`. None of it is on the critical
+path: each sequence is fetched only when its section is about a viewport away, and
+mobile never downloads one at all.
+
+If you need to bring the weight down, the lever is quality rather than frame count.
+`scripts/prepare-media.sh` has both knobs at the top, and the guidance is in
+`FLOW-PROMPTS.md` under **Check the weight**.
+
+`media/` (52 MB of raw exports) is gitignored. It is source material, not deployed —
+but it is what you re-cut from, so **back it up somewhere outside the repo.**
 
 ---
 
@@ -23,8 +31,15 @@ cd C:/JalanProjects
 git init -b main
 git add .
 git commit -m "Jalan Projects site"
-git remote add origin https://github.com/<you>/jalan-projects.git
+git remote add origin https://github.com/Parag8013/Jalan-Projects.git
 git push -u origin main
+```
+
+If `origin` already exists, `git remote add` fails and leaves the old URL in
+place. Overwrite it instead:
+
+```bash
+git remote set-url origin https://github.com/Parag8013/Jalan-Projects.git
 ```
 
 ### 2. Import into Vercel
@@ -56,15 +71,17 @@ automatically. Point DNS at Vercel (their nameservers, or `CNAME` for `www` and 
 **Vercel's Hobby tier prohibits commercial use.** This is a company's lead-generating
 site, which puts it outside those terms. Budget **$20/month for Pro** before launch.
 
-Bandwidth reinforces it. Every desktop visitor who reaches the build-to-suit scene
-downloads the **10 MB frame sequence**. Hobby includes 100 GB/month, so roughly
-**10,000 desktop visits would exhaust it** — and Vercel bills overage. Pro's included
-allowance plus the 30-day cache headers make this comfortable, but keep an eye on
-usage in the first month.
+Bandwidth is worth a look alongside it. A desktop visitor who reaches the bottom of
+the page pulls roughly **31 MB** — three frame sequences (23 MB), the orbit loop and
+the two ambient clips — so Hobby's 100 GB/month would run out somewhere around
+**3,300 full desktop visits**, and Vercel bills overage. The repo is larger than that
+because the mobile fallbacks for `build` and `interior` are never fetched on desktop,
+and the sequences are never fetched on mobile. Nobody downloads all 37 MB.
 
-If bandwidth becomes the dominant cost, move `public/frames` to ImageKit. The loader
-in `lib/imagekit-loader.ts` already exists, and `ScrubSequence` takes `frameSrc` as a
-function, so it is a one-line change at the call site in `FrameAssembly.tsx`.
+Pro's allowance plus the 30-day cache headers make this comfortable, but watch usage
+in the first month. If sequences turn out to dominate the bill, move `public/media`
+to ImageKit — the loader in `lib/imagekit-loader.ts` already exists, and
+`ScrubSequence` builds its own frame URLs in one place.
 
 ---
 
@@ -77,7 +94,9 @@ removes a pointless round trip across the planet.
 
 **Cache headers on `/frames/*` and `/media/*`** — 30 days. Vercel serves `public/`
 assets with `max-age=0, must-revalidate` by default, so without this every repeat
-visitor refetches all 21 MB.
+visitor refetches the whole media folder, sequences included. The `/media/*` rule now
+covers `public/media/seq` as well, which is where nearly all the weight is. The
+`/frames/*` rule is dead — that directory no longer exists — but it is harmless.
 
 Deliberately **not** `immutable`: filenames are stable across regrades, so a new
 grade under the same name would otherwise serve stale for a year. **If you re-export

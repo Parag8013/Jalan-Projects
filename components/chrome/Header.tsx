@@ -13,80 +13,107 @@ const NAV = [
   { label: 'Parks', href: '#parks' },
   { label: 'Build-to-suit', href: '#build' },
   { label: 'Process', href: '#process' },
+  { label: 'Leadership', href: '#leadership' },
 ];
 
 /**
- * Fixed header, always on cream.
+ * Fixed header.
  *
- * A transparent-over-hero bar was the first instinct, but the crest is a JPEG
- * on a white field: `mix-blend-multiply` only blends within the header's own
- * stacking context, so over video the white box stayed visible. An opaque bar
- * gives the blend a cream backdrop to disappear into, and reads calmer.
- * It deepens its hairline once the page moves.
+ * The site is one dark theatre throughout, so the bar no longer tracks a
+ * register changing underneath it — the whole light/dark interpolation this
+ * file used to carry went with the cream sections.
+ *
+ * It opens transparent over the hero so the assembly gets a clean full-bleed
+ * frame, then takes a translucent ground and a hairline once the page moves.
+ * Blurring only after the page has scrolled matters: a permanently blurred
+ * fixed bar forces a full-viewport composite on every frame of the scrub.
+ *
+ * The crest is a JPEG on a white field, which cannot sit on this ground —
+ * knocking the field out punches holes through the lion's muzzle. So the mark
+ * here is typographic, which is what the footer already did.
  */
 export default function Header() {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
     () => {
-      ScrollTrigger.create({
-        start: 'top -80',
+      const st = ScrollTrigger.create({
+        start: 'top -120',
         end: 99999,
         onToggle: (self) => {
           gsap.to('[data-bar]', {
-            borderBottomColor: self.isActive ? 'var(--color-line)' : 'rgba(231,224,208,0)',
-            duration: 0.35,
+            backgroundColor: self.isActive ? 'rgba(7,7,10,0.72)' : 'rgba(7,7,10,0)',
+            backdropFilter: self.isActive ? 'blur(14px)' : 'blur(0px)',
+            duration: 0.4,
+            ease: 'power2.out',
+          });
+          gsap.to('[data-hairline]', {
+            opacity: self.isActive ? 1 : 0,
+            duration: 0.4,
             ease: 'power2.out',
           });
         },
       });
+
+      return () => st.kill();
     },
     { scope: root },
   );
 
   return (
     <header ref={root} className="fixed inset-x-0 top-0 z-50">
-      <div data-bar className="border-b border-transparent bg-paper">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-8 px-[var(--spacing-gutter)] py-3">
-          <a href="#top" className="flex items-center gap-3" aria-label={`${COMPANY.name} — home`}>
-            {/* The crest is a small JPEG on a white field. It sits on cream, so
-                the field is imperceptible at this size. A vector original would
-                let it go anywhere — see docs/VERIFY-BEFORE-LAUNCH.md. */}
+      <div data-bar className="relative">
+        <span
+          data-hairline
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-px bg-white/12 opacity-0"
+        />
+
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-8 px-[var(--spacing-gutter)] py-4">
+          <a
+            href="#top"
+            className="flex items-center gap-3"
+            aria-label={`${COMPANY.name} — home`}
+          >
+            {/* The crest is gold line work on transparent, so it sits on the
+                dark ground without a plate behind it. Sized off the wordmark's
+                cap height rather than a round number, so the two read as one
+                lockup instead of a badge parked next to some type. */}
             <img
-              src="/logo-jalan.jpg"
+              src="/crest.png"
               alt=""
-              aria-hidden="true"
-              width={40}
-              height={45}
-              className="h-11 w-auto mix-blend-multiply"
+              width={186}
+              height={241}
+              className="h-8 w-auto shrink-0 select-none"
+              draggable={false}
             />
-            <span className="display text-[1.0625rem] leading-none tracking-tight">
-              Jalan <span className="text-gold-deep">Projects</span>
+            <span className="display text-[1.0625rem] leading-none tracking-tight text-white">
+              Jalan <span className="text-gold">Projects</span>
             </span>
           </a>
 
-          <nav className="hidden items-center gap-9 lg:flex" aria-label="Primary">
+          <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary">
             {NAV.map((n) => (
               <a
                 key={n.href}
                 href={n.href}
-                className="label text-grey transition-colors duration-200 hover:text-ink"
+                className="label text-ash transition-colors duration-200 hover:text-white"
               >
                 {n.label}
               </a>
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <a
               href={`tel:${COMPANY.phone.replace(/\s/g, '')}`}
-              className="numeral hidden text-[0.875rem] text-ink transition-colors duration-200 hover:text-gold-deep sm:block"
+              className="numeral hidden text-[0.875rem] text-mist transition-colors duration-200 hover:text-white sm:block"
             >
               {COMPANY.phone}
             </a>
             <a
               href="#enquiry"
-              className="bg-ink px-5 py-2.5 text-[0.8125rem] font-semibold text-paper transition-colors duration-200 hover:bg-gold-deep"
+              className="bg-gold px-5 py-2.5 text-[0.8125rem] font-semibold text-ink transition-colors duration-200 hover:bg-white"
             >
               Enquire
             </a>

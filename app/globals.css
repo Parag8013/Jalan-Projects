@@ -6,15 +6,31 @@
    --------------------------------------------------------------------------- */
 
 @theme {
-  /* Grounds */
+  /* Grounds.
+
+     The site is dark now. Footage is the medium and film wants a black
+     theatre, not a cream page — a full-bleed render on a light ground reads as
+     a picture pasted into a brochure. The two light values survive for the
+     couple of reading sections that earn a change of register. */
+  --color-void: #07070a; /* the theatre. Behind every piece of footage */
+  --color-carbon: #0d0d11; /* the reading ground on dark sections */
+  --color-slate: #17171d; /* raised panels, rows, hover states */
+  --color-edge: #26262f; /* hairlines on the dark register */
+
   --color-white: #ffffff;
-  --color-paper: #fdfcf9; /* warm cream — the default ground */
-  --color-shell: #f5f1e8; /* raised panels, hover states */
+  --color-paper: #fdfcf9; /* warm cream — light sections only */
+  --color-shell: #f5f1e8; /* raised panels on the light register */
 
   /* Ink */
   --color-ink: #16130e; /* warm near-black. 18.6:1 on paper */
-  --color-grey: #6b6355; /* secondary text. 5.9:1 on paper */
-  --color-line: #e7e0d0; /* hairlines */
+  --color-grey: #6b6355; /* secondary text on paper. 5.9:1 */
+  --color-line: #e7e0d0; /* hairlines on paper */
+
+  /* Type on the dark register.
+     --color-mist is 8.9:1 on --color-void and is the body value there.
+     --color-ash is 4.7:1: labels and captions only, never body copy. */
+  --color-mist: #c8c8d0;
+  --color-ash: #83838f;
 
   /* Gold — the crest colour.
      --gold is 2.4:1 on paper: DECORATIVE ONLY. Rules, fills, large display,
@@ -29,9 +45,11 @@
   --font-body: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 
-  --text-display-xl: clamp(2.75rem, 7.5vw, 7.5rem);
-  --text-display-l: clamp(2.125rem, 4.4vw, 4rem);
-  --text-display-s: clamp(1.5rem, 2.4vw, 2.125rem);
+  /* Larger and more confident than the previous set. Type competing with
+     full-bleed cinematography has to hold its own or it reads as a caption. */
+  --text-display-xl: clamp(3rem, 9vw, 9.5rem);
+  --text-display-l: clamp(2.25rem, 5.2vw, 4.75rem);
+  --text-display-s: clamp(1.5rem, 2.4vw, 2.25rem);
   --text-title: 1.3125rem;
   --text-lead: clamp(1.125rem, 1.5vw, 1.375rem);
   --text-body: 1.0625rem;
@@ -53,8 +71,8 @@
   }
 
   body {
-    background-color: var(--color-paper);
-    color: var(--color-ink);
+    background-color: var(--color-void);
+    color: var(--color-mist);
     font-family: var(--font-body);
     font-size: var(--text-body);
     line-height: 1.65;
@@ -81,12 +99,13 @@
     line-height: 0.94;
   }
 
-  /* One word per headline. Gold-deep so it survives on cream; components
-     override to --gold on the ink register. */
+  /* One word per headline. Gold is 7.4:1 on the void ground, so it is the
+     default now; the handful of light sections override to --gold-deep, which
+     is the value that survives on cream. */
   .accent-italic {
     font-style: italic;
     font-variation-settings: 'opsz' 144, 'SOFT' 60, 'WONK' 1;
-    color: var(--color-gold-deep);
+    color: var(--color-gold);
   }
 
   /* Every quantity on this site is mono and tabular. Without exception. */
@@ -108,7 +127,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-gold-deep);
+    outline: 2px solid var(--color-gold);
     outline-offset: 3px;
   }
 
@@ -129,7 +148,7 @@
   appearance: none;
   width: 100%;
   height: 2px;
-  background: var(--color-line);
+  background: var(--color-edge);
   outline: none;
   cursor: pointer;
 }
@@ -141,7 +160,7 @@
   height: 22px;
   border-radius: 50%;
   background: var(--color-gold);
-  border: 2px solid var(--color-ink);
+  border: 2px solid var(--color-void);
   cursor: grab;
   transition: transform 0.18s ease;
 }
@@ -156,12 +175,12 @@
   height: 22px;
   border-radius: 50%;
   background: var(--color-gold);
-  border: 2px solid var(--color-ink);
+  border: 2px solid var(--color-void);
   cursor: grab;
 }
 
 .range-gold:focus-visible::-webkit-slider-thumb {
-  outline: 2px solid var(--color-gold-deep);
+  outline: 2px solid var(--color-gold);
   outline-offset: 3px;
 }
 
@@ -196,22 +215,27 @@
   );
 }
 
-/* A faint drafting grid the whole document is measured on. */
-.drafting-grid {
-  position: fixed;
+/* Vignette. Sits over every full-bleed scene so the footage falls away at the
+   edges instead of ending at the viewport, and so type near the corners always
+   has something to sit on. */
+.vignette {
+  position: absolute;
   inset: 0;
-  z-index: 0;
   pointer-events: none;
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px);
-  background-size: 104px 104px;
+  background:
+    radial-gradient(120% 85% at 50% 42%, transparent 38%, rgba(7, 7, 10, 0.72) 100%);
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .drafting-grid {
-    display: none;
-  }
+/* Grain. One tiled SVG, no image request. Stops large flat gradients on the
+   dark register from banding on 8-bit displays, which they otherwise do
+   visibly across a full-bleed scrim. */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.038;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @media (prefers-reduced-motion: reduce) {

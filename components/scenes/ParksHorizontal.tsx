@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { PARKS } from '@/content/site';
 import { MOTION_CONTEXTS, formatNumber } from '@/lib/motion';
+import { registerStepGroup } from '@/lib/snap';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -84,7 +85,7 @@ export default function ParksHorizontal() {
           });
         });
 
-        gsap.to('[data-progress]', {
+        const progress = gsap.to('[data-progress]', {
           scaleX: 1,
           ease: 'none',
           scrollTrigger: {
@@ -94,6 +95,27 @@ export default function ParksHorizontal() {
             scrub: true,
           },
         });
+
+        // One stop per park. The track travels `distance` across the pin, so a
+        // panel is square in the frame when the pin's progress equals that
+        // panel's own offset along the track.
+        const unregister = registerStepGroup(() => {
+          const st = progress.scrollTrigger;
+          const span = distance();
+          if (!st || span <= 0) return null;
+
+          const range = st.end - st.start;
+          const points = panels.map((panel) =>
+            Math.round(st.start + Math.min(1, panel.offsetLeft / span) * range),
+          );
+          // The pin's own end, so the last gesture leaves rather than sticking
+          // on the final panel.
+          points.push(st.end);
+
+          return { from: st.start, to: st.end, points };
+        });
+
+        return () => unregister();
       });
 
       // Tablet and mobile: stacked, each panel animates on its own entry.
@@ -126,7 +148,7 @@ export default function ParksHorizontal() {
       ref={root}
       id="parks"
       aria-labelledby="parks-heading"
-      className="relative z-10 overflow-hidden bg-ink text-paper"
+      className="grain relative z-10 overflow-hidden bg-void"
     >
       <div className="lg:h-svh lg:overflow-hidden">
         <div
@@ -135,7 +157,7 @@ export default function ParksHorizontal() {
         >
           {/* Intro panel travels with the track. */}
           <div className="flex shrink-0 flex-col justify-center px-[var(--spacing-gutter)] py-[var(--spacing-section)] lg:w-[46vw] lg:py-0">
-            <p className="label text-white/50">05 · Industrial parks · Howrah</p>
+            <p className="label text-gold">05 · Industrial parks · Howrah</p>
             <h2
               id="parks-heading"
               className="display mt-7 max-w-[12ch] text-[length:var(--text-display-l)]"
@@ -209,7 +231,7 @@ export default function ParksHorizontal() {
       </div>
 
       {/* Horizontal progress. */}
-      <div className="absolute inset-x-0 bottom-0 hidden h-px bg-white/15 lg:block">
+      <div className="absolute inset-x-0 bottom-0 hidden h-px bg-edge lg:block">
         <span data-progress className="block h-full w-full origin-left scale-x-0 bg-gold" />
       </div>
     </section>

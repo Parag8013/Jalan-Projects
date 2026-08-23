@@ -6,15 +6,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import AmbientScene from '@/components/motion/AmbientScene';
 import RevealText from '@/components/motion/RevealText';
-import { COMPANY, PARKS, PROCESS, QUESTIONS, SCALE_FIGURES, SECTORS } from '@/content/site';
-import { EASE, formatNumber } from '@/lib/motion';
+import { COMPANY, PARKS, PROCESS, QUESTIONS, SECTORS } from '@/content/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /* -------------------------------------------------------------------------- */
 
-function Eyebrow({ children, tone = 'light' }: { children: React.ReactNode; tone?: 'light' | 'dark' }) {
-  return <p className={`label ${tone === 'dark' ? 'text-white/55' : 'text-grey'}`}>{children}</p>;
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return <p className="label text-gold">{children}</p>;
 }
 
 function SectionHead({
@@ -22,35 +21,33 @@ function SectionHead({
   accent,
   meta,
   lead,
-  tone = 'light',
 }: {
   title: string;
   accent?: string;
   meta: string;
   lead?: string;
-  tone?: 'light' | 'dark';
 }) {
   return (
     <header className="mb-[clamp(40px,6vw,80px)]">
       <div className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3">
-        <RevealText as="h2" className="display max-w-[15ch] text-[length:var(--text-display-l)]">
+        <RevealText as="h2" className="display max-w-[15ch] text-[length:var(--text-display-l)] text-white">
           {title}
           {accent ? (
             <>
               {' '}
-              <span className={`accent-italic ${tone === 'dark' ? 'text-gold' : ''}`}>{accent}</span>
+              <span className="accent-italic">{accent}</span>
             </>
           ) : null}
         </RevealText>
         <div data-reveal>
-          <Eyebrow tone={tone}>{meta}</Eyebrow>
+          <Eyebrow>{meta}</Eyebrow>
         </div>
       </div>
       {lead ? (
         <RevealText
           as="p"
           split="words"
-          className={`mt-8 max-w-[56ch] text-[length:var(--text-lead)] ${tone === 'dark' ? 'text-white/75' : 'text-grey'}`}
+          className="mt-8 max-w-[56ch] text-[length:var(--text-lead)] text-mist"
         >
           {lead}
         </RevealText>
@@ -60,132 +57,7 @@ function SectionHead({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Scene 7 — Scale band. Counters on a plain ground, no footage competing.     */
-
-export function ScaleBand() {
-  const root = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      SCALE_FIGURES.forEach((f, i) => {
-        const el = root.current?.querySelector(`[data-count="${i}"]`);
-        if (!el) return;
-        const n = { v: 0 };
-        gsap.to(n, {
-          v: f.value,
-          duration: 1.5,
-          ease: 'power2.out',
-          delay: i * 0.09,
-          onUpdate: () => {
-            el.textContent = f.decimals ? n.v.toFixed(f.decimals) : formatNumber(n.v);
-          },
-          scrollTrigger: { trigger: root.current, start: 'top 72%', once: true },
-        });
-      });
-
-      // Each figure's rule draws as its number lands.
-      gsap.fromTo(
-        '[data-fig-rule]',
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          duration: 0.9,
-          stagger: 0.09,
-          ease: 'expo.out',
-          scrollTrigger: { trigger: root.current, start: 'top 72%', once: true },
-        },
-      );
-    },
-    { scope: root },
-  );
-
-  return (
-    <section
-      ref={root}
-      className="relative z-10 bg-white px-[var(--spacing-gutter)] py-[var(--spacing-section)]"
-    >
-      <div className="mx-auto w-full max-w-[1440px]">
-        <div className="mb-14">
-          <Eyebrow>07 · Scale</Eyebrow>
-        </div>
-        <dl className="grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-          {SCALE_FIGURES.map((f, i) => (
-            <div key={f.label} className="group">
-              <span data-fig-rule className="mb-5 block h-px w-full origin-left bg-ink" />
-              <dd className="numeral text-[length:var(--text-numeral)] leading-none text-gold-deep">
-                <span data-count={i}>0</span>
-                {f.suffix}
-              </dd>
-              <dt className="display mt-4 text-[length:var(--text-title)]">{f.label}</dt>
-              <p className="mt-2 text-[0.875rem] leading-relaxed text-grey">{f.note}</p>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Scene 8 — Handover. Spec cards reveal on a scrubbed rail.                   */
-
-export function Handover() {
-  const root = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        '[data-spec-card]',
-        { opacity: 0, y: 44 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          stagger: 0.09,
-          ease: 'expo.out',
-          scrollTrigger: { trigger: root.current, start: 'top 78%', once: true },
-        },
-      );
-    },
-    { scope: root },
-  );
-
-  return (
-    <AmbientScene src="/media/m6-warehouse.mp4" poster="/media/m6-poster.jpg" tone="light">
-      <div ref={root}>
-        <SectionHead
-          title="Handed over"
-          accent="complete"
-          meta="08 · Build-to-suit · Handover"
-          lead="Floor, docks, power, drainage, apron, gatehouse. Finished to specification and handed to you ready to operate — not a shell with a snag list."
-        />
-
-        <div className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            ['Floor', '5 – 10 T/sqm', 'Laser-screeded VDF, FM2 tolerance, joint-free bays.'],
-            ['Docks', '6 – 12 T', 'Hydraulic levellers, shelters, apron to your turning radius.'],
-            ['Roof', '0.5 mm PPGI', 'Insulated profile sheet, turbo ventilators, skylights.'],
-            ['Power', 'To sanction', 'Dedicated transformer, LT panel, standby provision.'],
-          ].map(([k, v, d]) => (
-            <div
-              key={k}
-              data-spec-card
-              className="group bg-paper p-7 transition-colors duration-300 hover:bg-white"
-            >
-              <Eyebrow>{k}</Eyebrow>
-              <p className="numeral mt-3 text-[1.375rem] leading-none text-gold-deep">{v}</p>
-              <span className="mt-4 block h-px w-8 bg-gold transition-all duration-300 group-hover:w-16" />
-              <p className="mt-4 text-[0.875rem] leading-relaxed text-grey">{d}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </AmbientScene>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* Scene 9 — Sectors. A marquee that reacts to scroll velocity and direction.  */
+/* Scene 8 — Sectors. A marquee that reacts to scroll velocity and direction.  */
 
 export function Sectors() {
   const root = useRef<HTMLElement>(null);
@@ -218,10 +90,10 @@ export function Sectors() {
   );
 
   return (
-    <section ref={root} className="relative z-10 overflow-hidden border-y border-line bg-shell py-14">
+    <section ref={root} className="grain relative z-10 overflow-hidden border-y border-edge bg-slate py-14">
       <div className="mb-9 px-[var(--spacing-gutter)]">
         <div className="mx-auto w-full max-w-[1440px]">
-          <Eyebrow>09 · Sectors we build for</Eyebrow>
+          <Eyebrow>08 · Sectors we build for</Eyebrow>
         </div>
       </div>
 
@@ -230,7 +102,7 @@ export function Sectors() {
           <ul key={dup} className="flex items-center">
             {SECTORS.map((s) => (
               <li key={s} className="flex items-center whitespace-nowrap">
-                <span className="display px-8 text-[clamp(1.75rem,3.4vw,3rem)] text-ink">{s}</span>
+                <span className="display px-8 text-[clamp(1.75rem,3.4vw,3rem)] text-white">{s}</span>
                 <span className="h-2 w-2 rotate-45 bg-gold" />
               </li>
             ))}
@@ -245,7 +117,7 @@ export function Sectors() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Scene 10 — Process. Scrubbed rail, steps light as the line reaches them.    */
+/* Scene 9 — Process. Scrubbed rail, steps light as the line reaches them.    */
 
 export function Process() {
   const root = useRef<HTMLElement>(null);
@@ -291,17 +163,17 @@ export function Process() {
     <section
       ref={root}
       id="process"
-      className="relative z-10 bg-paper px-[var(--spacing-gutter)] py-[var(--spacing-section)]"
+      className="grain relative z-10 bg-carbon px-[var(--spacing-gutter)] py-[var(--spacing-section)]"
     >
       <div className="mx-auto w-full max-w-[1440px]">
         <SectionHead
           title="How land actually"
           accent="reaches you"
-          meta="10 · Process · 6 stages"
+          meta="09 · Process · 6 stages"
           lead="Conversion and mutation are the stages buyers are warned about. They are ours to handle, and they are included."
         />
 
-        <div className="relative mb-12 h-px w-full bg-line">
+        <div className="relative mb-12 h-px w-full bg-edge">
           <span data-progress className="absolute inset-0 origin-left scale-x-0 bg-gold" />
         </div>
 
@@ -310,13 +182,13 @@ export function Process() {
             <li key={p.step} data-step className="group">
               <div className="flex items-center gap-3">
                 <span data-dot className="h-2 w-2 rotate-45 bg-gold" />
-                <span className="numeral text-[0.8125rem] text-gold-deep">
+                <span className="numeral text-[0.8125rem] text-gold">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span className="numeral ml-auto text-[0.8125rem] text-grey">{p.duration}</span>
+                <span className="numeral ml-auto text-[0.8125rem] text-ash">{p.duration}</span>
               </div>
-              <h3 className="display mt-5 text-[length:var(--text-display-s)]">{p.step}</h3>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed text-grey">{p.detail}</p>
+              <h3 className="display mt-5 text-[length:var(--text-display-s)] text-white">{p.step}</h3>
+              <p className="mt-2 text-[0.9375rem] leading-relaxed text-mist">{p.detail}</p>
             </li>
           ))}
         </ol>
@@ -326,7 +198,7 @@ export function Process() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Scene 11 — Questions. Expand on click; only one open at a time.             */
+/* Scene 12 — Questions. Expand on click; only one open at a time.             */
 
 export function Questions() {
   const root = useRef<HTMLElement>(null);
@@ -352,32 +224,32 @@ export function Questions() {
   return (
     <section
       ref={root}
-      className="relative z-10 bg-white px-[var(--spacing-gutter)] py-[var(--spacing-section)]"
+      className="grain relative z-10 bg-void px-[var(--spacing-gutter)] py-[var(--spacing-section)]"
     >
       <div className="mx-auto w-full max-w-[1440px]">
         <SectionHead title="Before you" accent="call" meta="11 · Questions" />
 
-        <div className="border-t border-line">
+        <div className="border-t border-edge">
           {QUESTIONS.map((item, i) => (
             <details
               key={item.q}
               data-q
               name="questions"
               open={i === 0}
-              className="group border-b border-line"
+              className="group border-b border-edge"
             >
               <summary className="flex cursor-pointer list-none items-baseline justify-between gap-8 py-7 [&::-webkit-details-marker]:hidden">
-                <span className="display max-w-[34ch] text-[length:var(--text-title)] transition-colors duration-200 group-hover:text-gold-deep">
+                <span className="display max-w-[34ch] text-[length:var(--text-title)] text-white transition-colors duration-200 group-hover:text-gold">
                   {item.q}
                 </span>
                 <span
                   aria-hidden="true"
-                  className="numeral shrink-0 text-[1.25rem] text-gold-deep transition-transform duration-300 group-open:rotate-45"
+                  className="numeral shrink-0 text-[1.25rem] text-gold transition-transform duration-300 group-open:rotate-45"
                 >
                   +
                 </span>
               </summary>
-              <p className="max-w-[62ch] pb-8 text-[0.9375rem] leading-relaxed text-grey">
+              <p className="max-w-[62ch] pb-8 text-[0.9375rem] leading-relaxed text-mist">
                 {item.a}
               </p>
             </details>
@@ -394,14 +266,14 @@ export function Questions() {
 export function Close() {
   return (
     <AmbientScene
-      src="/media/m8-close.mp4"
-      poster="/media/m8-poster.jpg"
-      tone="dark"
+      src="/media/loop-close.mp4"
+      poster="/media/loop-close-poster.jpg"
+      scrim="heavy"
       id="enquiry"
       className="min-h-svh"
     >
       <div className="flex min-h-[62vh] flex-col justify-center">
-        <Eyebrow tone="dark">12 · Enquiry</Eyebrow>
+        <Eyebrow>12 · Enquiry</Eyebrow>
         <RevealText
           as="h2"
           className="display-xl mt-7 max-w-[13ch] text-[length:var(--text-display-xl)]"
@@ -411,7 +283,7 @@ export function Close() {
         <RevealText
           as="p"
           split="words"
-          className="mt-9 max-w-[50ch] text-[length:var(--text-lead)] text-white/75"
+          className="mt-9 max-w-[50ch] text-[length:var(--text-lead)] text-mist"
         >
           Area, location, power, timeline. If we have it, we will show you. If we do not, we will
           find it.
@@ -438,10 +310,10 @@ export function Close() {
           </a>
         </div>
 
-        <div className="mt-20 grid gap-x-10 gap-y-8 border-t border-white/20 pt-10 sm:grid-cols-3">
+        <div className="mt-20 grid gap-x-10 gap-y-8 border-t border-edge pt-10 sm:grid-cols-3">
           {PARKS.map((park) => (
             <div key={park.slug}>
-              <p className="label text-white/55">{park.place}</p>
+              <p className="label text-ash">{park.place}</p>
               <p className="mt-2 text-[0.9375rem]">{park.name}</p>
               <p className="numeral mt-1 text-[0.875rem] text-gold">
                 {park.availableAcres} acres available

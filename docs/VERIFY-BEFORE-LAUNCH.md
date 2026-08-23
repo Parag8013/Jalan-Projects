@@ -84,6 +84,40 @@ marketing.** Management signs them off or they come down.
 
 ---
 
+## Leadership — `content/site.ts` › `LEADERSHIP`
+
+| Field | Value | Status |
+|---|---|---|
+| Name | **Brij Mohan Jalan** | Supplied. Confirm spelling as he uses it. |
+| Role | **Chief Executive Officer** | Confirm the title he actually uses. |
+| Statement | `null` | See below. |
+
+The name appears in four places: the hero, the ledger signature, the leadership
+section and the footer. Changing `LEADERSHIP.ceo` updates all four.
+
+**No sentence anywhere on this site is attributed to Mr Jalan.** The four
+`principles` are written in the company's voice for exactly that reason — a
+quotation invented by a website builder and put in a named person's mouth is not
+a placeholder that can be quietly shipped.
+
+If a signed statement is wanted, get the words from him and set
+`LEADERSHIP.ceo.statement`. The leadership section already renders it as a pull
+quote when it is non-null, and renders nothing when it is not. No other change
+is needed.
+
+---
+
+## Year of establishment — `content/site.ts` › `COMPANY.founded`
+
+**1998 is generated.** It is shown in the hero eyebrow ("Established 1998"), in
+the ledger paragraph and in the leadership block.
+
+It is also arithmetically tied to the **28 years in operation** figure above.
+Fix one and the other has to move with it, or the page contradicts itself on two
+adjacent screens.
+
+---
+
 ## Contact — `content/site.ts` › `COMPANY`
 
 **Phone is confirmed: `+91 98360 88855`.** WhatsApp uses the same number.
@@ -101,12 +135,44 @@ It renders at 44px in the header, where it holds, but it cannot be used larger
 and cannot go on the dark register: knocking out the white field punches holes
 through the lion's muzzle and brow.
 
+The page now alternates between a cream and a near-black register, and the
+header follows it. On the dark register the crest fades out and the typographic
+wordmark carries the mark alone — the same thing the footer does. That is a
+workaround for the asset, not a design decision.
+
 **Ask for the original as SVG, or a PNG with real transparency at 1000px+.**
-Until then the footer carries a typographic wordmark instead of the crest.
 
 ---
 
-## Imagery
+## Imagery — `public/media/`
 
-All footage is generated. Any page presenting a model as a specific real asset
-needs an `INDICATIVE VISUALISATION` label — the parks section carries one.
+**Done.** All five clips are the real Flow generations, converted with
+`scripts/prepare-media.sh`, and the caption timings in `Assembly.tsx` have been
+tuned to them. The raw exports are in `media/` (gitignored) — back them up
+somewhere outside the repo, because they are what any recut starts from.
+
+If you regenerate anything, the follow-up steps in `FLOW-PROMPTS.md` still
+apply: update the frame-count constant the script prints, and retune the beats.
+Captions timed to the old clip will trail the new one.
+
+One thing worth a second opinion: the orbit covers roughly 70 degrees of arc, so
+it is played forward-then-backward to loop without a jump. The camera reverses
+direction at the turn. It is unobtrusive, but if it bothers you the fix is more
+Extends in Flow until the orbit closes a full circle, then dropping the
+`loop` argument on that one script invocation.
+
+Any page presenting footage as a specific real asset needs an `INDICATIVE
+VISUALISATION` label — the parks section carries one, and the footer carries a
+site-wide line. **Once real photography of the actual parks exists, that
+disclaimer should be reviewed rather than left standing out of habit.**
+
+---
+
+## The building in the footage — `content/buildToSuit.ts` › `REFERENCE`
+
+The hero shows one specific building being assembled: 30 m span, 12 m eave,
+7.5 m bays. Those figures are quoted on screen beside the film.
+
+If the real ranges change, change `REFERENCE` with them **and say so in the Flow
+prompt before regenerating** — otherwise the visitor watches a building being
+built while reading dimensions belonging to a different one.

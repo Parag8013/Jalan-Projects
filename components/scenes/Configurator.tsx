@@ -78,29 +78,29 @@ export default function Configurator() {
       ref={root}
       id="requirement"
       aria-labelledby="req-heading"
-      className="relative z-10 bg-shell px-[var(--spacing-gutter)] py-[var(--spacing-section)]"
+      className="grain relative z-10 bg-void px-[var(--spacing-gutter)] py-[var(--spacing-section)]"
     >
       <div className="mx-auto w-full max-w-[1440px]">
         <div className="mb-[clamp(40px,6vw,72px)] flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3">
           <RevealText
             as="h2"
             id="req-heading"
-            className="display max-w-[16ch] text-[length:var(--text-display-l)]"
+            className="display max-w-[16ch] text-[length:var(--text-display-l)] text-white"
           >
-            Size it before you <span className="accent-italic">call us</span>
+            Size it before you <span className="accent-italic text-gold">call us</span>
           </RevealText>
-          <p className="label text-grey">04 · Requirement · Interactive</p>
+          <p className="label text-gold">04 · Requirement · Interactive</p>
         </div>
 
-        <div className="grid gap-px border border-line bg-line lg:grid-cols-[1fr_1fr]">
+        <div className="grid gap-px border border-edge bg-edge lg:grid-cols-[1fr_1fr]">
           {/* ---- Controls ---- */}
-          <div className="bg-paper p-[clamp(24px,3.5vw,52px)]">
-            <label htmlFor="acres" className="label text-grey">
+          <div className="bg-carbon p-[clamp(24px,3.5vw,52px)]">
+            <label htmlFor="acres" className="label text-ash">
               Land required
             </label>
-            <p className="numeral mt-3 text-[clamp(2.5rem,5vw,4rem)] leading-none text-gold-deep">
+            <p className="numeral mt-3 text-[clamp(2.5rem,5vw,4rem)] leading-none text-gold">
               <span data-out="acres">{acres}</span>
-              <span className="ml-3 text-[0.28em] tracking-[0.2em] text-grey">ACRES</span>
+              <span className="ml-3 text-[0.28em] tracking-[0.2em] text-ash">ACRES</span>
             </p>
 
             <input
@@ -121,7 +121,7 @@ export default function Configurator() {
                   type="button"
                   onClick={() => setIdx(i)}
                   className={`numeral cursor-pointer px-1 py-1 text-[0.75rem] transition-colors duration-200 ${
-                    i === idx ? 'text-ink' : 'text-grey/60 hover:text-ink'
+                    i === idx ? 'text-white' : 'text-ash/70 hover:text-white'
                   }`}
                   aria-label={`${s} acres`}
                 >
@@ -131,7 +131,7 @@ export default function Configurator() {
             </div>
 
             <fieldset className="mt-12">
-              <legend className="label text-grey">Intended use</legend>
+              <legend className="label text-ash">Intended use</legend>
               <div className="mt-4 flex flex-wrap gap-2">
                 {USES.map((u) => (
                   <button
@@ -141,8 +141,8 @@ export default function Configurator() {
                     aria-pressed={use === u.id}
                     className={`cursor-pointer border px-5 py-3 text-[0.9375rem] transition-colors duration-200 ${
                       use === u.id
-                        ? 'border-ink bg-ink text-paper'
-                        : 'border-line text-ink hover:border-ink/50'
+                        ? 'border-gold bg-gold text-ink'
+                        : 'border-edge text-mist hover:border-white/45 hover:text-white'
                     }`}
                   >
                     {u.label}
@@ -153,19 +153,19 @@ export default function Configurator() {
 
             <a
               href={`https://wa.me/${COMPANY.whatsapp}?text=${encodeURIComponent(enquiry)}`}
-              className="mt-12 inline-flex items-center gap-3 bg-gold px-8 py-4 text-[0.9375rem] font-semibold text-ink transition-colors duration-200 hover:bg-ink hover:text-paper"
+              className="mt-12 inline-flex items-center gap-3 bg-gold px-8 py-4 text-[0.9375rem] font-semibold text-ink transition-colors duration-200 hover:bg-white"
             >
               Send this requirement
               <span aria-hidden="true">→</span>
             </a>
-            <p className="mt-4 max-w-[44ch] text-[0.8125rem] leading-relaxed text-grey">
+            <p className="mt-4 max-w-[44ch] text-[0.8125rem] leading-relaxed text-ash">
               Opens WhatsApp with the figures above already written out. Change anything you like
               before sending.
             </p>
           </div>
 
           {/* ---- Live output ---- */}
-          <div className="bg-paper p-[clamp(24px,3.5vw,52px)]">
+          <div className="bg-carbon p-[clamp(24px,3.5vw,52px)]">
             <dl className="grid grid-cols-2 gap-x-8 gap-y-9">
               {/* The rendered value is the *final* figure, not a zero
                   placeholder: React resets textContent on every re-render, so a
@@ -179,33 +179,33 @@ export default function Configurator() {
                 ] as const
               ).map(([label, key, note, value]) => (
                 <div key={key} className={key === 'sqft' ? 'col-span-2' : ''}>
-                  <dt className="label text-grey">{label}</dt>
+                  <dt className="label text-ash">{label}</dt>
                   <dd
-                    className={`numeral mt-2 leading-none text-ink ${
+                    className={`numeral mt-2 leading-none text-white ${
                       key === 'sqft' ? 'text-[clamp(2rem,3.6vw,3rem)]' : 'text-[1.75rem]'
                     }`}
                   >
                     <span data-out={key}>{formatNumber(value)}</span>
                   </dd>
-                  <p className="mt-2 text-[0.8125rem] text-grey">{note}</p>
+                  <p className="mt-2 text-[0.8125rem] text-ash">{note}</p>
                 </div>
               ))}
               <div>
-                <dt className="label text-grey">Clear span</dt>
-                <dd className="numeral mt-2 text-[1.75rem] leading-none text-ink">{spec.span}</dd>
-                <p className="mt-2 text-[0.8125rem] text-grey">column-free</p>
+                <dt className="label text-ash">Clear span</dt>
+                <dd className="numeral mt-2 text-[1.75rem] leading-none text-white">{spec.span}</dd>
+                <p className="mt-2 text-[0.8125rem] text-ash">column-free</p>
               </div>
             </dl>
 
             {/* Footprint preview. Blocks are the units, the frame is the plot. */}
             <div className="mt-12">
-              <p className="label mb-4 text-grey">Indicative footprint</p>
-              <div className="relative aspect-[16/9] w-full border border-gold-deep/70 bg-gold-wash/50 p-[4%]">
+              <p className="label mb-4 text-ash">Indicative footprint</p>
+              <div className="relative aspect-[16/9] w-full border border-gold/45 bg-gold/[0.06] p-[4%]">
                 <div className="flex h-full flex-wrap content-start gap-[1.5%]">
                   {blocks.map((_, i) => (
                     <span
                       key={i}
-                      className="block bg-ink/80"
+                      className="block bg-gold/80"
                       style={{
                         width: `${units <= 4 ? 46 : units <= 9 ? 30 : units <= 16 ? 22 : 15}%`,
                         height: units <= 4 ? '44%' : units <= 9 ? '30%' : units <= 16 ? '22%' : '15%',
@@ -214,7 +214,7 @@ export default function Configurator() {
                   ))}
                 </div>
                 {units > 24 ? (
-                  <span className="numeral absolute bottom-2 right-3 text-[0.75rem] text-ink/70">
+                  <span className="numeral absolute bottom-2 right-3 text-[0.75rem] text-ash">
                     +{units - 24} more
                   </span>
                 ) : null}

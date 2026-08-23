@@ -1,229 +1,204 @@
-# Scroll Choreography — Motion-graphics scroll narrative
+# Scroll Choreography
 
-The core document for this build. `DESIGN-SYSTEM.md` decides how it looks; `VIDEO-PROMPTS.md`
+The core document for this build. `DESIGN-SYSTEM.md` decides how it looks; `FLOW-PROMPTS.md`
 supplies the footage; this decides how the two move together.
 
 ---
 
 ## The form
 
-**Video is the medium. Scroll is the transport.**
+**Film is the medium. Scroll is the transport.**
 
-The site is one continuous cinematic sequence. Full-bleed footage carries the visitor from the widest
-possible view of West Bengal down to a specific floor slab, and data graphics resolve on top of the
-footage at timed beats. Closer to an Apple product page than to a brochure.
+The site is one dark theatre. Three scenes are scroll-scrubbed film — the visitor turns the wheel and
+drives the camera — and everything between them is either a looping ambient scene or type on the
+dark ground.
 
-Two kinds of scene:
+The spine is the hero: scroll builds a building out of light, from an empty plot through frame,
+cladding and glazing to a lit finished shed. When the assembly lands, a slow orbit of the same
+building takes over the background and loops.
 
-| Kind | Behaviour | Used for |
+---
+
+## Why frame sequences and not `<video>`
+
+Driving `video.currentTime` from scroll is the obvious approach and it fails. Browsers seek to the
+nearest keyframe, so the scrub stutters; iOS Safari will not seek reliably at all. Encoding
+all-intra fixes the seeking and triples the file.
+
+So scrubbed scenes are **decoded JPEG sequences painted to a canvas**, which is what every polished
+scroll-video site actually ships. `scripts/prepare-media.sh` turns a Flow export into one.
+
+| | Approach |
+|---|---|
+| **Scrubbed** (assembly, orbit, interior) | ~210 frames at 1200px, painted to `<canvas>` on scroll |
+| **Ambient** (land, close) | `<video muted playsinline loop>`, fetched only as its section approaches |
+| **Mobile, all scenes** | The clip itself, played once on entry. No sequence is ever downloaded |
+
+### Two details in `ScrubSequence` that matter
+
+**Frames load coarse-to-fine, not in order.** Requesting 0, 1, 2… means the last third of the scene
+is still missing when a fast scroller reaches it. The loader walks the strip at stride 8, then 4,
+then 2, then 1 — so after roughly an eighth of the bytes the whole scrub is already covered at a low
+frame rate, and everything after that just fills in.
+
+**A missing frame paints its nearest decoded neighbour.** Without that the canvas holds the last
+frame it managed to draw, and a fast scroll through a half-loaded sequence freezes instead of
+running rough. Degrading to a lower frame rate is always better than degrading to a still.
+
+### And one in `prepare-media.sh`
+
+**The looping clips are played forward then backward.** Flow shots move at a constant speed and
+never return to where they started — the orbit covers about 70 degrees of arc and stops facing the
+gable end — so a plain `loop` jump-cuts back to frame one every time round. `pingpong()` concatenates
+the clip with its own reverse, which makes the join seamless at the cost of doubling the file. The
+camera visibly reverses direction, which on a slow drift against black is far less noticeable than a
+cut. Only `orbit`, `loop-land` and `loop-close` get it; scrubbed sequences never loop.
+
+The alternative is a crossfade loop, and it does not work here: blending a tail 70 degrees around
+from the head double-exposes the building at two angles. Crossfading only helps when the ends
+already nearly match.
+
+---
+
+## The assembly
+
+One pin, 560 % of viewport, `scrub: 0.7`. Seven captions cross-fade against the footage.
+
+| Progress | Beat | What the footage is doing |
 |---|---|---|
-| **Scrubbed** | Scroll position drives the video frame. The visitor moves the camera. | V2, V5, V7 — the three big moments |
-| **Ambient** | Video autoplays and loops; scroll drives the graphics over it | V1, V3, V4, V6, V8, V9 |
+| 0.00 | **Site** | Bare slab, motes gathering |
+| 0.10 | **Foundation** | Pad footings landing in a grid |
+| 0.28 | **Columns** | Steel columns extruding upward |
+| 0.38 | **Portal frame** | Rafters closing to the ridge |
+| 0.55 | **Cladding** | Roof and wall panels sealing, dock openings cut |
+| 0.76 | **Glazing** | Glass condensing out of the particles |
+| 0.87 | **Handover** | Complete, lit from within |
+| 0.93 | — | The orbit loop takes the background |
 
-### What the graphics do
+**These numbers are tuned to the clip, never the other way round.** Generated video does not hit a
+timing brief, so after new footage lands, scrub the hero in dev — a live percentage sits in the
+bottom-right corner in development only — note where each stage actually arrives, and edit the
+`BEATS` table in `components/scenes/Assembly.tsx`.
 
-Footage alone is atmosphere. The graphics are what make it *information*.
-
-The drawing language from `DESIGN-SYSTEM.md` — boundaries, dimension lines, corner brackets, mono
-figures — now lives **on top of real footage** rather than on an empty ground. A clear-span dimension
-drawn across a warehouse interior while the camera retreats does something no standalone diagram can:
-it puts a number on a space you are currently moving through.
-
-That combination is the whole design. Neither half works alone.
-
----
-
-## Technical approach — the one decision that matters
-
-**Scrubbed scenes use image sequences on canvas, not `<video>` + `currentTime`.**
-
-Driving `video.currentTime` from scroll is the obvious approach and it fails in practice: browsers
-seek to the nearest keyframe, so scrubbing stutters, and iOS Safari refuses to seek reliably at all.
-Every polished scroll-video site draws decoded frames to a `<canvas>` instead.
-
-| | Approach | Cost |
-|---|---|---|
-| **Scrubbed (V2, V5, V7)** | Extract to ~240 JPG/WebP frames, preload, draw to `<canvas>` on scroll | More requests, but ImageKit serves them and it is the only approach that is actually smooth |
-| **Ambient (all others)** | `<video muted playsinline loop autoplay>` with a poster | Trivial |
-
-### Frame extraction
-
-```bash
-ffmpeg -i v7-interior.mp4 -vf "fps=24,scale=1600:-2" -q:v 6 frames/v7/%04d.jpg
-```
-
-24fps over a 16s clip is ~380 frames. Serve at three widths via ImageKit and pick by device pixel
-ratio. Budget ~40–60KB per frame at 1600px — around 8–12MB for a full sequence, preloaded during the
-preceding scene so it is ready before the scrub begins.
-
-**Mobile:** no scrubbing. The clip plays once on entry as ordinary autoplay video, graphics animate
-on a timer instead of on scroll. Identical information, no frame sequence downloaded.
+The last beat has to clear `HANDOFF` by a comfortable margin. The stage readout fades out one
+percent after the handoff begins, so a caption placed at the handoff is on screen for a fraction of
+a viewport and nobody reads it.
 
 ---
 
-## The narrative
+## Snapping
 
-Ten scenes. Each names its footage, its behaviour, and what the graphics carry.
+Scroll is quantised, but not uniformly — a page that treats a film and a column of prose the same way
+gets one of them wrong.
 
-### 1 · Opening — `V1` ambient
-
-Full-bleed aerial, looping. Corner brackets draw in, one dimension line along the lower edge, then
-the headline sets.
-
-> **LAND, ANYWHERE IN WEST BENGAL.**
-
-On scroll out: footage scales to 1.06 and dims to 0.35 as the headline lifts away.
-
----
-
-### 2 · Reach — `V1` continues, graphics take over
-
-The claim gets proven before it gets repeated. Over the still-running aerial, an SVG of West Bengal
-resolves and districts fill in sequence, counter climbing alongside.
-
-**Data:** confirmed district count. If coverage is 8 districts solid with reach into others, show 8
-solid and the rest outline — a buyer in Malda can tell whether you actually work in Malda, and the
-honest version persuades harder than the maximal one.
-
----
-
-### 3 · Descent — `V2` ⚑ SCRUBBED · `end: '+=250%'`
-
-The first big moment. Scroll drives a continuous descent from high altitude down to a single parcel.
-**The visitor flies the camera themselves.**
-
-| Scroll % | Beat |
+| Where | Behaviour |
 |---|---|
-| 0–70 | Pure scrub. Descent only. No graphics — let the footage work. |
-| 70–85 | Plot boundary strokes on around the parcel, `--oxide`, corner nodes snap in |
-| 85–100 | Dimension lines extend, figures count up, size-range line sets |
+| **Inside a pinned scene** | *Committed.* Any gesture hands the page to the next stop in that direction and the journey cannot be interrupted. One flick, one construction stage |
+| **Section boundaries** | *Magnetic.* Only pulls when the visitor has already stopped within 12 % of a viewport of a section top. Alignment, not transport |
+| **Everywhere else** | Free. A long section is read a screenful at a time, as it should be |
 
-Restraint in the first 70% is deliberate. The descent is the effect; decorating it would weaken it.
+Stops are registered by the scenes themselves (`lib/snap.ts`), as **functions rather than values** —
+every one is derived from a ScrollTrigger whose `start` and `end` move on each refresh, so reading
+them at the moment of the gesture means there is no cache to invalidate.
 
----
+### Why not ScrollTrigger's own `snap`
 
-### 4 · Scale — graphics only, `--prussian` ground
+It snaps by animating the window's scroll position. Lenis reads that as external interference and
+drags it back toward its own internal target, and the two fight visibly. Every snap goes through
+`lenis.scrollTo` instead, so only one thing is ever moving the page.
 
-**Nobody can feel an acre.** A plot rectangle grows through real size steps — 1 → 5 → 20 → 100 acres
-— with warehouse units tiling inside it so growth stays legible. Ends with the boundary running past
-the frame edge and one line: `ANY SIZE.`
+### Three details that decide whether it feels right
 
-Reference unit is **truck bays and unit counts**, never football fields. This audience thinks in bays
-and clear span; a football-field comparison talks down to them.
+**A stop sits after a caption's cue, not on it.** A cue is where a caption *begins* fading in, so
+resting exactly there lands on the worst frame in the scene: the incoming caption at zero opacity,
+the outgoing one half gone, nothing readable. `restPoints()` carries each stop past the end of the
+fade. It costs a few frames of footage and it is what makes every stop look composed.
 
-Kept graphics-only and on the dark ground so it reads as a deliberate pause between two film
-sequences. Pacing needs the contrast.
+**Groups overlap deliberately, and the first one with somewhere to go wins.** A scene claims a
+lead-in of 0.35 of a viewport above its own start, so its opening frame is a stop rather than
+something the visitor is already past. Two scenes that sit against each other therefore overlap, and
+the outgoing one — which has no further stops to offer — would swallow the gesture and make the next
+scene's opening frame unreachable. The engine walks every group covering the position and takes the
+first that actually has a next stop.
 
----
+**The settle pass is the safety net under the step pass.** A step commits, arrives, and holds a
+90 ms cooldown; any wheel still in flight during that cooldown moves the page a few pixels off the
+stage with no gesture left to commit the next one. Coming to rest 16 px past a composed frame is
+exactly the not-quite the whole mechanism exists to remove, so at rest inside a scene the position
+is re-aligned to the nearest stop. Bounded to the scene's own range and not its lead-in — a visitor
+leaving upward is briefly still inside the lead zone, and re-aligning there would pull them back
+into a scene they have just decided to leave.
 
-### 5 · The parks — `V3` + `V4` ambient, `--prussian`
+### Where it is off
 
-Register inverts: these are the owned, planned assets. Three panels scrub horizontally over the
-approach footage. Per park — plot boundary draws, available parcels fill, four counters run (total
-area, available area, power sanction, distance to Kolkata), connectivity distances type in as a
-dimension list.
-
-**Connectivity numbers close industrial deals.** This scene deserves the most data attention of any
-on the site.
-
----
-
-### 6 · Structure — `V5` ⚑ SCRUBBED · `end: '+=200%'`
-
-Scroll raises the camera alongside a steel portal frame, and **scroll direction is construction
-sequence**. The mechanic and the subject are the same thing.
-
-| Scroll % | Beat |
-|---|---|
-| 0–20 | Rise begins, footage only |
-| 20–40 | Eave-height dimension extends up the columns, tracking the camera |
-| 40–60 | Clear-span dimension draws across the rafters |
-| 60–80 | Bay spacing, purlin and bracing annotations light in sequence |
-| 80–100 | **Configurability beat** — span and eave figures scrub through their full ranges |
-
-The existing `FrameDrawing` SVG survives here as the overlay layer, registered to the footage.
+Touch keeps its native momentum, and below 768 px the scenes are not pinned at all, so there is
+nothing to step through. Under `prefers-reduced-motion` Lenis never initialises and none of this
+runs.
 
 ---
 
-### 7 · Handover — `V6` ambient
+## Two things that were got wrong, and why they are the way they are
 
-Lateral track along the facade. Dock count and bay spacing annotate as the camera passes each door.
+**Type never crossfades with the ground behind it.** The first version faded the caption colour from
+ink to white while the scene faded from cream to black. Both pass through the same mid grey at the
+same instant and the copy disappears for a whole beat — and no ordering of the two fixes it, because
+a crossfade always passes through the middle. Every scrubbed scene now puts its copy on a fixed
+scrim at fixed contrast.
 
----
-
-### 8 · Interior scale — `V7` ⚑ SCRUBBED · `end: '+=250%'` · the money shot
-
-Camera retreats down the centre line of a vast empty column-free floor. The clear-span dimension
-draws across the full width and **holds** as the camera pulls back — so the span visibly grows in
-frame while the number climbs.
-
-This is where "40 m clear span" stops being a number. Best single use of scroll on the site.
-
-Floor load and eave height annotate in the final 20%.
+**Scrims follow the copy, not the composition.** The specification scene runs a heading down the left
+edge and a spec sheet down the right, and a single right-weighted gradient left the heading sitting
+on bare cladding. It now uses a flat base plus a reinforced column under each block of type.
 
 ---
 
-### 9 · In operation — `V8` ambient
+## The running order
 
-Loading yard from above. Throughput and dock figures count up.
+Twelve sections, all on the dark register. Rhythm comes from value steps between `void`, `carbon` and
+`slate`, and from spacing the three scrubbed scenes apart — a visitor who has just driven one camera
+for five viewports needs something to read before they drive another.
+
+| # | Section | Ground | Motion |
+|---|---|---|---|
+| 01 | Assembly | film | **Pinned, scrubbed** |
+| 02 | Ledger | carbon | Counters |
+| 03 | What we do | carbon | Sticky card stack |
+| 04 | Requirement | void | Interactive |
+| 05 | Sourcing | film | Ambient loop |
+| 06 | Parks | void | **Pinned, horizontal** |
+| 07 | Specification | film | **Pinned, scrubbed** |
+| 08 | Handover | film | **Pinned, scrubbed** |
+| 09 | Sectors | slate | Velocity marquee |
+| 10 | Process | carbon | Scrubbed rail |
+| 11 | Leadership | carbon | Nameplate |
+| 12 | Questions | void | Disclosure |
+| 13 | Enquiry | film | Ambient loop |
+
+**Four pins.** That is one more than the old budget allowed, and it is deliberate: three of them are
+the film, which is what the site is for.
 
 ---
 
-### 10 · Close — `V9` ambient, into enquiry
+## Technical spec
 
-Camera rises and pulls back over the landscape. Final line sets, then the enquiry form.
+**One clock.** Lenis is driven from GSAP's ticker, so smooth scroll and every ScrollTrigger share a
+single rAF loop. Two separate loops is the usual cause of scrub jitter.
 
-**Motion stops at the form.** The visitor has arrived to act; animation now is friction. Fields
-reveal once, then the section is still.
+**Overlays run off paused timelines that scroll scrubs.** A scene with seven cross-fading captions
+costs zero React re-renders. Each timeline is padded to a duration of exactly 1 with a trailing
+`set()` — without it the duration is wherever the last tween happens to end, and `progress()` maps
+scroll onto a shorter span, firing every caption early.
+
+**Pins refresh after fonts load.** Pins compute their distance from element heights; if that happens
+before the webfont swaps, every pin lands in the wrong place.
 
 ---
 
-## Pin budget
-
-| Viewport | Pins |
-|---|---|
-| ≥1024px | **3** — scenes 3, 6, 8 (the three scrubbed sequences) |
-| 768–1023px | **1** — scene 8 only |
-| <768px | **0** — all scrubbed scenes become autoplay with timed graphics |
+## Degradation
 
 Information never degrades across breakpoints. Only the choreography does.
 
----
-
-## Performance
-
-Video-led sites fail on weight, not on animation. Hard budgets:
-
-| Item | Budget |
+| Context | Behaviour |
 |---|---|
-| Hero video (V1) | ≤ 2.5MB, poster always present |
-| Ambient clips | ≤ 2MB each, `preload="none"` until their section approaches |
-| Frame sequence | ≤ 12MB per scrubbed scene, preloaded during the *preceding* scene |
-| Home route JS | < 200KB gzipped |
-| LCP | < 2.5s on 4G — hero **poster image** is the LCP element, never the video |
-
-**Never let video block LCP.** The poster is a real image with `priority`, the video loads after.
-
-Loading discipline: a sequence starts preloading when the previous scene enters, tracked by
-ScrollTrigger. Show a thin progress indication if frames are not ready rather than scrubbing a
-half-loaded sequence.
-
-**Save-Data and slow connections:** `navigator.connection.saveData` or `effectiveType` of `2g`/`3g`
-skips frame sequences entirely and falls back to posters plus graphics. The information survives; the
-cinema does not.
-
-**Reduced motion:** no scrubbing, no autoplay. Poster frames, final graphic states, 200ms opacity
-fades only.
-
----
-
-## Build order
-
-1. **Scenes 3, 6, 8** — the scrubbed sequences. Blocked on V2, V5, V7 only.
-2. Canvas scrub engine + frame preloader — buildable now against placeholder frames.
-3. Scene 4 (Scale) — graphics only, no footage dependency.
-4. Ambient scenes — trivial once the language is set.
-5. Enquiry, footer, SEO, QA.
-
-The scrub engine is the one piece of real engineering here and it has no asset dependency. It gets
-built while the footage generates.
+| **Desktop / tablet** ≥ 768 px | Full choreography, sequences scrubbed |
+| **Mobile** ≤ 767 px | No sequence is downloaded. Each scrubbed scene plays its clip once on entry and runs the same overlay on a seven-second timer, so every figure still arrives. Parks stacks instead of pinning |
+| **`prefers-reduced-motion`** | Lenis never initialises. Every scene shows its poster and resolves every overlay to its final state. Nothing moves, nothing is missing |

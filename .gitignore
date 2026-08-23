@@ -9,7 +9,7 @@ next-env.d.ts
 *.tsbuildinfo
 .DS_Store
 
-# Raw Flow exports (~52MB). Source material, not deployed — public/media and
-# public/frames hold the graded, web-ready versions. Keep these backed up
-# somewhere outside the repo; they are needed to re-grade.
+# Raw Flow exports. Source material, not deployed — scripts/prepare-media.sh
+# turns these into the web-ready sequences and clips in public/media. Keep them
+# backed up somewhere outside the repo; they are what you re-cut from.
 /media/
