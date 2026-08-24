@@ -43,6 +43,54 @@ mkdir -p "$OUT"
 # land on the same count and the same file size.
 TARGET_FRAMES=210
 
+# Which watermark the generator burns in, and how it is taken out.
+#
+#   sparkle  Gemini / Flow's four-pointed star, about 89% across and 82% down.
+#            Removed with delogo. It sits too far into the frame to crop:
+#            reaching it from the right costs 12% of the width and from the
+#            bottom 20% of the height, to delete a mark 40px across. At the
+#            1200px the frames are cut to, the residue is a faint smudge.
+#   corner   The older "Veo" wordmark, hard into the bottom-right corner.
+#            Cropped, because a crop is exact and 6% off the bottom is
+#            invisible under cover-fit.
+#   both     If a clip somehow carries both.
+#   none     A watermark-free source. Google AI Ultra does not burn one in, and
+#            if you are on that tier this should be `none` — delogo over clean
+#            footage smears a patch where there was nothing to remove.
+#
+# Override for a single run:
+#   WATERMARK=corner bash scripts/prepare-media.sh scrub build ~/Downloads/x.mp4
+WATERMARK="${WATERMARK:-sparkle}"
+
+# Built per source rather than hardcoded, so it survives a switch to 1080p or
+# 4K: the watermark scales with the frame, so a fraction of the frame does too.
+# Emits a trailing comma, or nothing at all, so it can be pasted straight onto
+# the front of a filter chain.
+watermark_filter () {
+  local src="$1" w h f=""
+  w=$(ffprobe -v error -select_streams v:0 -show_entries stream=width  -of csv=p=0 "$src")
+  h=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$src")
+
+  case "$WATERMARK" in
+    sparkle|both)
+      f="delogo=x=$(awk -v v="$w" 'BEGIN{printf "%d", v*0.885}')"
+      f="$f:y=$(awk -v v="$h" 'BEGIN{printf "%d", v*0.788}')"
+      f="$f:w=$(awk -v v="$w" 'BEGIN{printf "%d", v*0.042}')"
+      f="$f:h=$(awk -v v="$h" 'BEGIN{printf "%d", v*0.077}'),"
+      ;;
+  esac
+
+  # Ordered after delogo deliberately: delogo's coordinates are measured on the
+  # full frame, so anything that changes the geometry has to come later.
+  case "$WATERMARK" in
+    corner|both)
+      f="${f}crop=iw:floor(ih*0.94/2)*2:0:0,"
+      ;;
+  esac
+
+  printf '%s' "$f"
+}
+
 duration () {
   ffprobe -v error -show_entries format=duration -of csv=p=0 "$1" | cut -d. -f1
 }
@@ -58,7 +106,7 @@ encode_clip () {
   # $1 source, $2 output basename, $3 crf
   ffmpeg -v error -y -i "$1" \
     -c:v libx264 -crf "$3" -preset slow -pix_fmt yuv420p \
-    -vf "scale='min(1600,iw)':-2" \
+    -vf "$(watermark_filter "$1")scale='min(1600,iw)':-2" \
     -movflags +faststart -an "$OUT/$2.mp4"
 }
 
@@ -75,6 +123,11 @@ pingpong () {
 
 poster () {
   # $1 clip, $2 output basename, $3 seek seconds
+  #
+  # No watermark_filter here, deliberately: this reads the clip encode_clip
+  # has already cleaned. Running it twice would delogo a patch of clean
+  # picture, and under `corner` would crop the poster to a different frame
+  # from the sequence that paints over it.
   ffmpeg -v error -y -ss "$3" -i "$1" -frames:v 1 -q:v 5 \
     -vf "scale='min(1600,iw)':-2" "$OUT/$2.jpg"
 }
@@ -94,7 +147,7 @@ case "$MODE" in
     # 1200 wide at q8. The canvas draws cover-fit and the source is soft, so
     # this still holds up on a 2560px display, and it is a third of the weight
     # of the 1600/q6 that looks identical in motion.
-    ffmpeg -v error -y -i "$SRC" -vf "fps=$FPS,scale=1200:-2" -q:v 8 "$DIR/%04d.jpg"
+    ffmpeg -v error -y -i "$SRC" -vf "fps=$FPS,$(watermark_filter "$SRC")scale=1200:-2" -q:v 8 "$DIR/%04d.jpg"
 
     # The mobile fallback: mobile plays the clip rather than scrubbing frames.
     encode_clip "$SRC" "$NAME" 28

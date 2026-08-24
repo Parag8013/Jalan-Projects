@@ -111,14 +111,27 @@ export default function AmbientScene({
       </div>
 
       <div className="vignette" aria-hidden="true" />
+      {/* Tuned for daylight footage, and lighter than it used to be.
+
+          The previous values — 0.82/0.6/0.9 and 0.9/0.82/0.94 — were set
+          against near-black clips, where a heavy wash costs nothing because
+          there is nothing under it to lose. Over a sunlit field or a lit
+          industrial park the same values read as a grey sheet laid over a
+          photograph, and they throw away the brightness the footage was
+          regenerated to get.
+
+          The weight is now concentrated at the top and bottom edges, where the
+          type actually sits, and the middle is allowed to stay bright. That is
+          the shape a daylight scrim wants: dark where the words are, open
+          where the picture is. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{
           background:
             scrim === 'heavy'
-              ? 'linear-gradient(to bottom, rgba(7,7,10,0.9), rgba(7,7,10,0.82) 45%, rgba(7,7,10,0.94))'
-              : 'linear-gradient(to bottom, rgba(7,7,10,0.82), rgba(7,7,10,0.6) 45%, rgba(7,7,10,0.9))',
+              ? 'linear-gradient(to bottom, rgba(7,7,10,0.86), rgba(7,7,10,0.66) 45%, rgba(7,7,10,0.9))'
+              : 'linear-gradient(to bottom, rgba(7,7,10,0.78), rgba(7,7,10,0.46) 45%, rgba(7,7,10,0.84))',
         }}
       />
 

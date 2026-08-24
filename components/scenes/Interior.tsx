@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import ScrubSequence from '@/components/motion/ScrubSequence';
+import PlaySequence from '@/components/motion/PlaySequence';
 import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -80,10 +80,15 @@ export default function Interior() {
           h.at + 0.01,
         );
         if (next) {
+          /* Clears before the next card arrives. These stack in one position,
+             so any genuine overlap shows as two figures printed over each
+             other — tolerable when a scrub made it fleeting, fixed and
+             visible now that a clock sets the pace. There is room for the gap:
+             the figures are 0.18 apart at the tightest. */
           t.to(
             `[data-card="${i}"]`,
             { opacity: 0, y: -22, duration: 0.035, ease: 'power2.in' },
-            next.at - 0.025,
+            next.at - 0.05,
           );
         }
       });
@@ -97,7 +102,7 @@ export default function Interior() {
         '[data-final]',
         { opacity: 0, y: 26 },
         { opacity: 1, y: 0, duration: 0.06, ease: 'power2.out' },
-        0.88,
+        0.9,
       );
 
       t.set({}, {}, 1);
@@ -112,12 +117,15 @@ export default function Interior() {
 
   return (
     <section ref={root} className="relative z-10">
-      <ScrubSequence
+      {/* Ten seconds — four figures, paced to the time an unpinned section
+          actually gets rather than to the length of the dolly. */}
+      <PlaySequence
         seq="interior"
         frameCount={INTERIOR_FRAMES}
         poster={media('/media/interior-poster.jpg')}
         video={media('/media/interior.mp4')}
-        end="+=300%"
+        duration={10}
+        loop
         onProgress={(p) => tl.current?.progress(p)}
       >
         <div className="vignette" aria-hidden="true" />
@@ -182,7 +190,7 @@ export default function Interior() {
             </div>
           </div>
         </div>
-      </ScrubSequence>
+      </PlaySequence>
     </section>
   );
 }

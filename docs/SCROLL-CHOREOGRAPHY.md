@@ -25,24 +25,25 @@ Driving `video.currentTime` from scroll is the obvious approach and it fails. Br
 nearest keyframe, so the scrub stutters; iOS Safari will not seek reliably at all. Encoding
 all-intra fixes the seeking and triples the file.
 
-So scrubbed scenes are **decoded JPEG sequences painted to a canvas**, which is what every polished
-scroll-video site actually ships. `scripts/prepare-media.sh` turns a Flow export into one.
+So film scenes are **decoded JPEG sequences painted to a canvas**. That was originally forced by
+scrubbing; it survives the move to timed playback because it is also what makes frame blending
+possible. `scripts/prepare-media.sh` turns a Flow export into one.
 
 | | Approach |
 |---|---|
-| **Scrubbed** (assembly, orbit, interior) | ~210 frames at 1200px, painted to `<canvas>` on scroll, `scrub: 0.4` |
+| **Film** (assembly, orbit, interior) | ~210 frames at 1200px, painted to `<canvas>` on a clock when the section enters view. Not pinned, not scrubbed |
 | **Ambient** (land, close) | `<video muted playsinline loop>`, fetched only as its section approaches |
-| **Mobile, all scenes** | The clip itself, played once on entry. No sequence is ever downloaded |
+| **Mobile, all scenes** | The clip itself, rate-matched to the same clock. No sequence is ever downloaded |
 
-### Three details in `ScrubSequence` that matter
+### Four details in `PlaySequence` that matter
 
 **Frames load coarse-to-fine, not in order.** Requesting 0, 1, 2… means the last third of the scene
-is still missing when a fast scroller reaches it. The loader walks the strip at stride 8, then 4,
+is still missing when playback reaches it. The loader walks the strip at stride 8, then 4,
 then 2, then 1 — so after roughly an eighth of the bytes the whole scrub is already covered at a low
 frame rate, and everything after that just fills in.
 
 **A missing frame paints its nearest decoded neighbour**, and asks for itself out of turn. Without
-the fallback the canvas holds the last frame it managed to draw, and a fast scroll through a
+the fallback the canvas holds the last frame it managed to draw, and playback through a
 half-loaded sequence freezes instead of running rough — degrading to a lower frame rate is always
 better than degrading to a still. Without the demand request, the frame the visitor is actually
 looking at waits its turn behind two hundred it cannot see.
@@ -67,7 +68,7 @@ never return to where they started — the orbit covers about 70 degrees of arc 
 gable end — so a plain `loop` jump-cuts back to frame one every time round. `pingpong()` concatenates
 the clip with its own reverse, which makes the join seamless at the cost of doubling the file. The
 camera visibly reverses direction, which on a slow drift against black is far less noticeable than a
-cut. Only `orbit`, `loop-land` and `loop-close` get it; scrubbed sequences never loop.
+cut. Only `orbit`, `loop-land` and `loop-close` get it; the frame sequences never loop.
 
 The alternative is a crossfade loop, and it does not work here: blending a tail 70 degrees around
 from the head double-exposes the building at two angles. Crossfading only helps when the ends
@@ -77,7 +78,8 @@ already nearly match.
 
 ## The assembly
 
-One pin, 560 % of viewport, `scrub: 0.7`. Seven captions cross-fade against the footage.
+No pin. The film runs on its own clock — `HOLD` seconds on the first frame so the headline can be
+read, then `RUN` seconds of playback — and seven captions cross-fade against the footage as it goes.
 
 | Progress | Beat | What the footage is doing |
 |---|---|---|
@@ -91,9 +93,13 @@ One pin, 560 % of viewport, `scrub: 0.7`. Seven captions cross-fade against the 
 | 0.93 | — | The orbit loop takes the background |
 
 **These numbers are tuned to the clip, never the other way round.** Generated video does not hit a
-timing brief, so after new footage lands, scrub the hero in dev — a live percentage sits in the
+timing brief, so after new footage lands, watch the hero in dev — a live percentage sits in the
 bottom-right corner in development only — note where each stage actually arrives, and edit the
 `BEATS` table in `components/scenes/Assembly.tsx`.
+
+The captions are now on a timer rather than under the visitor's thumb, which puts a hard ceiling on
+their length: the tightest gap in the table above is about a second and a half at the current `RUN`.
+A `note` that cannot be read in its slot is not a shorter note, it is no note.
 
 The last beat has to clear `HANDOFF` by a comfortable margin. The stage readout fades out one
 percent after the handoff begins, so a caption placed at the handoff is on screen for a fraction of
@@ -118,10 +124,21 @@ canvas every frame is expensive — it stops tracking the input, and the result 
 stutter: exactly the failure it was there to prevent. Snapping compounded it, because a gesture that
 does something other than what the hand did is only pleasant while it is perfectly smooth.
 
-**Smoothing the film instead costs nothing and cannot fail that way.** `SCRUB` in `ScrubSequence`
-eases the canvas toward the scroll position; the scroll position itself stays honest and instant, and
-no layout depends on it. A wheel notch is ~100px, which at the hero's density is five frames at once,
-so some easing is needed for the picture not to step — but it belongs on the picture.
+**Then the scrubbing went too, and for a reason one level up.** Even with the scroll position honest
+and the film smooth, a scene that holds the document still for five and a half viewports while it
+plays is a scene in which scrolling does not scroll. The client's report was that something was
+"obstructing the animation playback," and that is an exact description of the mechanism working as
+designed. There was no tuning left to try, because the objection was to the design.
+
+So the film plays on a clock and the page is free — see `components/motion/PlaySequence.tsx`. The
+smoothness that `scrub: 0.4` used to supply now comes from blending each frame into the next on the
+canvas, which is a better place for it: 210 frames over 20 seconds is 13 fps, and a cross-dissolve
+between adjacent frames synthesises the rest at the display's refresh rate.
+
+One pin survives, in `ParksHorizontal`, and the distinction is the lesson. There, vertical scroll is
+spent travelling sideways through the three parks: the gesture still moves what the visitor is
+looking at, in proportion, under their control. Pinning was never the fault. Spending the visitor's
+scroll on something that was going to happen anyway was.
 
 ---
 

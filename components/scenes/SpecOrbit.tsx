@@ -4,13 +4,13 @@ import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import ScrubSequence from '@/components/motion/ScrubSequence';
+import PlaySequence from '@/components/motion/PlaySequence';
 import { EAVE_RANGE, FRAME_STAGES, SPAN_RANGE } from '@/content/buildToSuit';
 import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-export const ORBIT_FRAMES = 210;
+export const ORBIT_FRAMES = 192;
 
 
 /**
@@ -79,12 +79,22 @@ export default function SpecOrbit() {
 
   return (
     <section ref={root} id="build" className="relative z-10">
-      <ScrubSequence
+      {/* Twelve seconds, and it is set by dwell time rather than by the shot.
+
+          Nothing pins this section any more, so the sheet only fills in for as
+          long as the visitor happens to be looking at it — and a viewport-tall
+          section gets maybe five to ten seconds of that. The orbit would happily
+          run to twenty; at twenty, most people would leave having read the first
+          three rows of a seven-row specification, which is the one thing this
+          scene cannot afford. The rows dim rather than clear as they go, so what
+          has already arrived is still on screen when the last one lands. */}
+      <PlaySequence
         seq="orbit"
         frameCount={ORBIT_FRAMES}
         poster={media('/media/orbit-poster.jpg')}
         video={media('/media/orbit.mp4')}
-        end="+=340%"
+        duration={12}
+        loop
         onProgress={(p) => tl.current?.progress(p)}
       >
         <div className="vignette" aria-hidden="true" />
@@ -115,7 +125,10 @@ export default function SpecOrbit() {
           }}
         />
 
-        <div className="absolute inset-0 px-[var(--spacing-gutter)] py-[clamp(76px,10vh,112px)]">
+        {/* Extra top padding clears the fixed header, which is about 74px tall.
+            At the old uniform 76px the section label sat directly under it and
+            read as clipped on a short viewport. */}
+        <div className="absolute inset-0 px-[var(--spacing-gutter)] pb-[clamp(76px,10vh,112px)] pt-[clamp(108px,13vh,140px)]">
           <div className="mx-auto grid h-full max-w-[1440px] grid-rows-[auto_1fr] gap-8 lg:grid-cols-[1fr_minmax(360px,42%)] lg:grid-rows-1 lg:items-center lg:gap-16">
             <div data-head className="translate-y-6 opacity-0 self-start lg:self-center">
               <p className="label text-gold">06 · Build-to-suit · Portal frame</p>
@@ -181,7 +194,7 @@ export default function SpecOrbit() {
             </dl>
           </div>
         </div>
-      </ScrubSequence>
+      </PlaySequence>
     </section>
   );
 }

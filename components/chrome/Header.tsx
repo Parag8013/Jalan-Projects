@@ -52,6 +52,14 @@ export default function Header() {
             duration: 0.4,
             ease: 'power2.out',
           });
+          /* The top-of-page gradient hands over to the solid bar rather than
+             sitting under it — two scrims stacked read as a heavier, muddier
+             band than either was tuned to be. */
+          gsap.to('[data-skyscrim]', {
+            opacity: self.isActive ? 0 : 1,
+            duration: 0.4,
+            ease: 'power2.out',
+          });
         },
       });
 
@@ -63,13 +71,39 @@ export default function Header() {
   return (
     <header ref={root} className="fixed inset-x-0 top-0 z-50">
       <div data-bar className="relative">
+        {/* Ground for the nav at the very top of the page, where `data-bar` is
+            still fully transparent.
+
+            This is new with daylight footage and it is not optional. The bar
+            only fades in after 120px of scroll, which was fine while the hero
+            opened on a black void — white type on black needs no help. The
+            hero now opens on a bright sky with white cloud, and unscrimmed
+            white and mist type on that is genuinely unreadable rather than
+            merely low-contrast.
+
+            A gradient rather than a filled bar, so the top of the page still
+            reads as open sky rather than as a chrome strip. It extends past
+            the bar's own height for the same reason: a hard bottom edge would
+            be a bar by another name. */}
+        <span
+          data-skyscrim
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[190%]"
+          style={{
+            background:
+              'linear-gradient(to bottom, rgba(7,7,10,0.78) 0%, rgba(7,7,10,0.52) 38%, rgba(7,7,10,0.22) 68%, transparent 100%)',
+          }}
+        />
         <span
           data-hairline
           aria-hidden="true"
           className="absolute inset-x-0 bottom-0 h-px bg-white/12 opacity-0"
         />
 
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-8 px-[var(--spacing-gutter)] py-4">
+        {/* `relative` so it paints above the two absolutely-positioned scrims
+            behind it. Positioned elements win over static ones regardless of
+            DOM order, so without this the gradient covers the nav. */}
+        <div className="relative mx-auto flex max-w-[1440px] items-center justify-between gap-8 px-[var(--spacing-gutter)] py-4">
           <a
             href="#top"
             className="flex items-center gap-3"

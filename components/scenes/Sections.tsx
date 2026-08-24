@@ -68,24 +68,75 @@ export function Sectors() {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduced) return;
 
-      // Scroll speed feeds the marquee: faster scrolling drags the band along,
-      // and reversing direction reverses it. Cheap, and it makes the page feel
-      // physically connected to the wheel.
-      const track = root.current?.querySelector<HTMLElement>('.marquee-track');
+      /* Scroll speed feeds the marquee, but through `timeScale` — never
+         through the CSS animation.
+       *
+       * This used to rewrite `animationDuration` and `animationDirection` on
+       * every scroll tick, and it was wrong three times over:
+       *
+       * 1. **It never slowed down again.** `onUpdate` only fires while
+       *    ScrollTrigger is updating, which is while the page is moving. Stop
+       *    scrolling and the last value written simply stayed — so one brisk
+       *    flick left the band tearing across the screen indefinitely, with
+       *    nothing to bring it back.
+       * 2. **Duration changes teleport a CSS animation.** Its position is
+       *    elapsed-time over duration, so rewriting the duration re-maps where
+       *    it is mid-cycle. Doing that every frame is a stutter, and flipping
+       *    `animationDirection` at the same time compounds it.
+       * 3. **The ceiling was six times speed.** 38s down to 6.3s is not a drag
+       *    on the band, it is a different animation.
+       *
+       * `timeScale` has none of those problems: it changes the rate without
+       * touching the position, so it is smooth at any value and at any moment.
+       * And because the boost is applied as a one-off with a tween easing it
+       * back to 1, the band always returns to its resting drift on its own. */
+      const track = root.current?.querySelector<HTMLElement>('[data-marquee]');
       if (!track) return;
 
-      ScrollTrigger.create({
+      // Two identical lists sit side by side, so -50% is exactly one cycle.
+      // Starts paused: the trigger below owns whether it runs, and without
+      // that this animates for the whole length of the page before the section
+      // is ever reached.
+      const drift = gsap.to(track, {
+        xPercent: -50,
+        duration: 38,
+        ease: 'none',
+        repeat: -1,
+        paused: true,
+      });
+
+      let settle: gsap.core.Tween | null = null;
+
+      const st = ScrollTrigger.create({
         trigger: root.current,
         start: 'top bottom',
         end: 'bottom top',
+        // No point running a rAF loop for a band nobody can see.
+        onToggle: (self) => (self.isActive ? drift.play() : drift.pause()),
         onUpdate: (self) => {
-          const boost = 1 + Math.min(Math.abs(self.getVelocity()) / 900, 5);
-          gsap.set(track, {
-            animationDuration: `${38 / boost}s`,
-            animationDirection: self.direction === 1 ? 'normal' : 'reverse',
+          const boost = Math.min(Math.abs(self.getVelocity()) / 1200, 2);
+          drift.timeScale((self.direction === 1 ? 1 : -1) * (1 + boost));
+
+          settle?.kill();
+          settle = gsap.to(drift, {
+            timeScale: 1,
+            duration: 0.9,
+            ease: 'power2.out',
+            overwrite: true,
           });
         },
       });
+
+      /* `onToggle` only fires on a change, so a load that already has the
+         section on screen — a deep link, or a restored scroll position — would
+         otherwise leave it paused forever. */
+      if (st.isActive) drift.play();
+
+      return () => {
+        settle?.kill();
+        drift.kill();
+        st.kill();
+      };
     },
     { scope: root },
   );
@@ -98,7 +149,7 @@ export function Sectors() {
         </div>
       </div>
 
-      <div className="flex w-max marquee-track" aria-hidden="true">
+      <div className="flex w-max" data-marquee aria-hidden="true">
         {[0, 1].map((dup) => (
           <ul key={dup} className="flex items-center">
             {SECTORS.map((s) => (

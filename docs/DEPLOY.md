@@ -81,7 +81,7 @@ and the sequences are never fetched on mobile. Nobody downloads all 37 MB.
 Pro's allowance plus the 30-day cache headers make this comfortable, but watch usage
 in the first month. If sequences turn out to dominate the bill, move `public/media`
 to ImageKit — the loader in `lib/imagekit-loader.ts` already exists, and
-`ScrubSequence` builds its own frame URLs in one place.
+`PlaySequence` builds its own frame URLs in one place.
 
 ---
 

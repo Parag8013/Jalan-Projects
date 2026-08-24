@@ -184,25 +184,18 @@
   outline-offset: 3px;
 }
 
-/* Scroll-velocity marquee. */
-@keyframes marquee-drift {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.marquee-track {
-  animation: marquee-drift 38s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-  }
-}
+/* The sectors marquee has no CSS animation, deliberately.
+ *
+ * It used to drift via `@keyframes` while JavaScript rewrote its
+ * `animation-duration` on every scroll tick. Two things then wrote the same
+ * `transform`, and changing a CSS animation's duration re-maps its position
+ * mid-cycle rather than just changing its rate — so the band stuttered, and
+ * once scrolling stopped it kept whatever speed the last tick had set.
+ *
+ * It is now a GSAP tween whose `timeScale` scroll velocity nudges, easing back
+ * to 1 on its own. See the Sectors scene in components/scenes/Sections.tsx.
+ * Reduced motion is handled there too: the tween is never created.
+ */
 
 /* A hairline gold rule, used to open sections. */
 .rule-gold {
