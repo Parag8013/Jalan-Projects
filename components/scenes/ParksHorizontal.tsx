@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { PARKS } from '@/content/site';
 import { MOTION_CONTEXTS, formatNumber } from '@/lib/motion';
+import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -21,6 +22,30 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
  */
 export default function ParksHorizontal() {
   const root = useRef<HTMLElement>(null);
+
+  /* Each panel carries drone footage of its own park. Nothing is fetched until
+     the panel is on screen, and it pauses again when it leaves — the track
+     moves by transform, which IntersectionObserver still sees. */
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const videos = root.current?.querySelectorAll<HTMLVideoElement>('[data-park-video]');
+    if (!videos?.length) return;
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach(({ target, isIntersecting }) => {
+          const v = target as HTMLVideoElement;
+          if (isIntersecting) {
+            if (v.networkState === HTMLMediaElement.NETWORK_EMPTY) v.load();
+            v.play().catch(() => {});
+          } else {
+            v.pause();
+          }
+        }),
+      { threshold: 0.15 },
+    );
+    videos.forEach((v) => io.observe(v));
+    return () => io.disconnect();
+  }, []);
 
   useGSAP(
     () => {
@@ -154,8 +179,28 @@ export default function ParksHorizontal() {
             <article
               key={park.slug}
               data-panel
-              className="flex shrink-0 flex-col justify-center border-t border-white/12 px-[var(--spacing-gutter)] py-[var(--spacing-section)] lg:w-[42vw] lg:border-l lg:border-t-0 lg:py-0"
+              className="relative isolate flex shrink-0 flex-col justify-center overflow-hidden border-t border-white/12 px-[var(--spacing-gutter)] py-[var(--spacing-section)] lg:w-[42vw] lg:border-l lg:border-t-0 lg:py-0"
             >
+              <video
+                data-park-video
+                className="absolute inset-0 -z-20 h-full w-full object-cover"
+                poster={media(`/media/loop-park-${park.slug}-poster.jpg`)}
+                muted
+                loop
+                playsInline
+                preload="none"
+                aria-hidden="true"
+              >
+                <source src={media(`/media/loop-park-${park.slug}.mp4`)} type="video/mp4" />
+              </video>
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 -z-10"
+                style={{
+                  background:
+                    'linear-gradient(to right, rgba(7,7,10,0.93) 0%, rgba(7,7,10,0.84) 55%, rgba(7,7,10,0.6) 100%)',
+                }}
+              />
               <p className="numeral text-[0.8125rem] text-gold">
                 {String(i + 1).padStart(2, '0')}
               </p>

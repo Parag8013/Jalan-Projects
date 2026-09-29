@@ -18,3 +18,6 @@ next-env.d.ts
 # turns these into the web-ready sequences and clips in public/media. Keep them
 # backed up somewhere outside the repo; they are what you re-cut from.
 /media/
+
+# Raw drone footage (4K, tens of GB). Source only — same rule as /media/ above.
+/Videos/

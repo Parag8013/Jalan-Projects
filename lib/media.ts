@@ -21,7 +21,7 @@
  * **Bump this whenever anything in `public/media` changes.** It is one
  * character, and it is the only thing that makes the 30-day cache safe.
  */
-export const MEDIA_VERSION = '4';
+export const MEDIA_VERSION = '5';
 
 /**
  * Stamp a `/media` path so the CDN and the browser treat it as new content.
