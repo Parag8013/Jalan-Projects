@@ -11,12 +11,11 @@ import { media } from '@/lib/media';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/** ⚠ GENERATED — see docs/VERIFY-BEFORE-LAUNCH.md. */
-const REACH = [
-  { value: 14, suffix: '', label: 'Districts', note: 'Sourcing reach across West Bengal' },
-  { value: 1450, suffix: '+', label: 'Acres transacted', note: 'Since inception' },
-  { value: 2, suffix: ' ac', label: 'Practical minimum', note: 'Below this, cost per acre climbs' },
-] as const;
+const REACH: { value: number; suffix: string; label: string; note: string; text?: string }[] = [
+  { value: 0, suffix: '', text: 'Howrah', label: 'District', note: 'Where we source land' },
+  { value: 3000, suffix: '+', label: 'Acres transacted', note: 'Since 1981' },
+  { value: 100, suffix: '+ ac', label: 'Parcel size', note: 'From a single acre upward' },
+];
 
 /**
  * Scene 5 — sourcing.
@@ -36,7 +35,7 @@ export default function Land() {
     () => {
       REACH.forEach((f, i) => {
         const el = root.current?.querySelector(`[data-count="${i}"]`);
-        if (!el) return;
+        if (!el || f.text) return;
 
         const n = { v: 0 };
         gsap.to(n, {
@@ -86,8 +85,8 @@ export default function Land() {
         >
           Half of this business is land nobody has listed. We identify the parcel, verify the
           title, negotiate directly with whoever holds it, and carry it through conversion and
-          mutation until the record reads your name — anywhere in the state, at any size worth
-          moving for.
+          mutation until the record reads your name — anywhere in Howrah, from one acre to a
+          hundred and more.
         </RevealText>
 
         <dl className="mt-[clamp(56px,8vw,104px)] grid gap-x-12 gap-y-12 sm:grid-cols-3">
@@ -95,7 +94,7 @@ export default function Land() {
             <div key={f.label}>
               <span data-rule className="mb-5 block h-px w-full origin-left bg-white/25" />
               <dd className="numeral text-[length:var(--text-numeral)] leading-none text-gold">
-                <span data-count={i}>0</span>
+                <span data-count={i}>{f.text ?? 0}</span>
                 {f.suffix}
               </dd>
               <dt className="display mt-4 text-[length:var(--text-title)] text-white">

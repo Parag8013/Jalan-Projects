@@ -29,7 +29,7 @@ export default function Ledger() {
     () => {
       SCALE_FIGURES.forEach((f, i) => {
         const el = root.current?.querySelector(`[data-count="${i}"]`);
-        if (!el) return;
+        if (!el || f.text) return;
 
         const n = { v: 0 };
         gsap.to(n, {
@@ -116,7 +116,7 @@ export default function Ledger() {
             <div key={f.label}>
               <span data-fig-rule className="mb-5 block h-px w-full origin-left bg-edge" />
               <dd className="numeral text-[length:var(--text-numeral)] leading-none text-gold">
-                <span data-count={i}>0</span>
+                <span data-count={i}>{f.text ?? 0}</span>
                 {f.suffix}
               </dd>
               <dt className="display mt-4 text-[length:var(--text-title)] text-white">

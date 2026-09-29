@@ -10,15 +10,10 @@ Nothing ships until this file is empty.
 
 ## Company scale — `content/site.ts` › `SCALE_FIGURES`
 
-| Shown | Generated value | Confirm with |
-|---|---|---|
-| Acres transacted | **1,450+** | Management |
-| Sq ft delivered | **3.2M** | Projects |
-| Years in operation | **28** | Management |
-| Districts covered | **14** | Sales |
-
-Years in operation is the easiest to check and the most load-bearing — it sits
-under the founding claim.
+✅ **Confirmed** — supplied by Jalan Projects, Sept 2026: 3,000+ acres
+transacted, 130M sq ft delivered, 45 years in operation, Howrah district.
+Land sourcing range (1 – 100+ acres) and plot availability (all 3 parks) came
+from the same sheet.
 
 ---
 
@@ -26,9 +21,9 @@ under the founding claim.
 
 | Park | Total | Available | Power | Roads |
 |---|---|---|---|---|
-| Sankrail, Dhulagori | **110 ac** | **18 ac** | **5 MVA** | **12 m** |
-| Jalan, Amta Road | **85 ac** | **22 ac** | **3 MVA** | **10 m** |
-| Amta, Amta Road | **65 ac** | **26 ac** | **2.5 MVA** | **10 m** |
+| Sankrail, Dhulagori | **110 ac** | **18 ac** | **5 MVA** | 10 m ✅ |
+| Jalan, Amta Road | **85 ac** | **22 ac** | **3 MVA** | 12 m ✅ |
+| Amta, Amta Road | **65 ac** | **26 ac** | **2.5 MVA** | 12 m ✅ |
 
 **Available acreage changes.** Whoever owns sales needs to own this row, and it
 should be reviewed on a fixed schedule once live.
@@ -109,12 +104,9 @@ is needed.
 
 ## Year of establishment — `content/site.ts` › `COMPANY.founded`
 
-**1998 is generated.** It is shown in the hero eyebrow ("Established 1998"), in
-the ledger paragraph and in the leadership block.
-
-It is also arithmetically tied to the **28 years in operation** figure above.
-Fix one and the other has to move with it, or the page contradicts itself on two
-adjacent screens.
+✅ **Confirmed: 1981.** Shown in the hero eyebrow, the ledger paragraph and the
+leadership block. It is tied to the 45 years in operation figure — move one and
+the other has to move with it.
 
 ---
 

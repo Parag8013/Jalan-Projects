@@ -1,18 +1,16 @@
 /**
  * Site content and figures.
  *
- * ⚠ EVERY NUMBER IN THIS FILE IS GENERATED, NOT SUPPLIED.
- *
- * They are plausible for a Howrah industrial developer and exist so the site
- * reads as finished. They are not facts. See docs/VERIFY-BEFORE-LAUNCH.md for
- * the full checklist — each figure is listed there with who should confirm it.
+ * Supplied by Jalan Projects (Sept 2026): year founded, the four headline
+ * scale figures, the land sourcing range, plot availability and park road
+ * widths. Everything else is still ⚠ GENERATED — plausible for a Howrah
+ * industrial developer, but not fact. See docs/VERIFY-BEFORE-LAUNCH.md.
  */
 
 export const COMPANY = {
   name: 'Jalan Projects',
   base: 'Howrah, West Bengal',
-  /** ⚠ GENERATED. Confirm the actual year of establishment. */
-  founded: 1998,
+  founded: 1981,
   phone: '+91 98360 88855',
   whatsapp: '919836088855',
   email: 'enquiry@jalanprojects.in',
@@ -68,13 +66,15 @@ export type ScaleFigure = {
   note: string;
   /** Decimal places to hold while counting. Omit for whole numbers. */
   decimals?: number;
+  /** Shown as-is instead of a counter, for figures that are not numbers. */
+  text?: string;
 };
 
 export const SCALE_FIGURES: ScaleFigure[] = [
-  { value: 1450, suffix: '+', label: 'Acres transacted', note: 'Across West Bengal since inception' },
-  { value: 3.2, suffix: 'M', label: 'Sq ft delivered', note: 'Warehousing, sheds and logistics', decimals: 1 },
-  { value: 28, suffix: '', label: 'Years in operation', note: 'Continuously, under the same family' },
-  { value: 14, suffix: '', label: 'Districts covered', note: 'Sourcing reach across the state' },
+  { value: 3000, suffix: '+', label: 'Acres transacted', note: 'Since 1981' },
+  { value: 130, suffix: 'M', label: 'Sq ft delivered', note: 'Of land handed over to buyers' },
+  { value: 45, suffix: '', label: 'Years in operation', note: 'Continuously, under the same family' },
+  { value: 0, suffix: '', text: 'Howrah', label: 'District covered', note: 'Where our land and parks are' },
 ];
 
 export type Park = {
@@ -98,7 +98,7 @@ export const PARKS: Park[] = [
     totalAcres: 110,
     availableAcres: 18,
     power: '5 MVA sanctioned',
-    roadWidth: '12 m internal roads',
+    roadWidth: '10 m internal roads',
     highway: 'NH-16 · Kona Expressway',
     connectivity: [
       { label: 'Kolkata', value: '14 km' },
@@ -115,7 +115,7 @@ export const PARKS: Park[] = [
     totalAcres: 85,
     availableAcres: 22,
     power: '3 MVA sanctioned',
-    roadWidth: '10 m internal roads',
+    roadWidth: '12 m internal roads',
     highway: 'Amta Road (SH-15)',
     connectivity: [
       { label: 'Kolkata', value: '22 km' },
@@ -132,7 +132,7 @@ export const PARKS: Park[] = [
     totalAcres: 65,
     availableAcres: 26,
     power: '2.5 MVA sanctioned',
-    roadWidth: '10 m internal roads',
+    roadWidth: '12 m internal roads',
     highway: 'Amta Road (SH-15)',
     connectivity: [
       { label: 'Kolkata', value: '31 km' },
@@ -148,17 +148,17 @@ export const PARKS: Park[] = [
 export const CAPABILITIES = [
   {
     title: 'Land sourcing',
-    lead: 'Any size, any district',
+    lead: 'One acre to a hundred and more',
     detail:
-      'We identify parcels across West Bengal, verify title, negotiate directly with landholders, and complete conversion and mutation before handover.',
-    figure: '1 – 500+ acres',
+      'We identify parcels across Howrah, verify title, negotiate directly with landholders, and complete conversion and mutation before handover.',
+    figure: '1 – 100+ acres',
   },
   {
     title: 'Industrial park plots',
     lead: 'Developed and ready',
     detail:
       'Plots inside our three Howrah parks, with roads, power, water and drainage already in place. Build immediately or have us build for you.',
-    figure: '66 acres available',
+    figure: 'Plots in all 3 parks',
   },
   {
     title: 'Build-to-suit warehouses',
@@ -216,7 +216,7 @@ export const SECTORS = [
 export const QUESTIONS = [
   {
     q: 'What is the smallest parcel you will work on?',
-    a: 'One acre inside our parks. For sourced land the practical minimum is around two acres, below which acquisition cost per acre rises sharply.',
+    a: 'One acre, whether inside our parks or sourced for you. At the other end we have put together parcels of a hundred acres and more.',
   },
   {
     q: 'Do you handle conversion and mutation?',
@@ -224,7 +224,7 @@ export const QUESTIONS = [
   },
   {
     q: 'Can you find land outside your parks?',
-    a: 'That is half of what we do. We source across fourteen districts of West Bengal, and reach further where a requirement justifies it.',
+    a: 'That is half of what we do. We source land across Howrah district, alongside plots in our own three parks.',
   },
   {
     q: 'How long from brief to possession?',
