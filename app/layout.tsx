@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import { Fraunces, Plus_Jakarta_Sans, JetBrains_Mono, Prata } from 'next/font/google';
 import ScrollRoot from '@/components/motion/ScrollRoot';
 import './globals.css';
 
@@ -13,6 +13,19 @@ const fraunces = Fraunces({
   axes: ['SOFT', 'WONK', 'opsz'],
   style: ['normal', 'italic'],
   variable: '--font-fraunces',
+  display: 'swap',
+});
+
+/**
+ * Prata sets Mr Jalan's name and initials only. Fraunces draws its capital J
+ * dropping below the baseline, which reads as a misspelling in "BMJ" and
+ * "Jalan"; Prata keeps J on the line and is close enough in contrast and
+ * stress to sit beside the Fraunces headings.
+ */
+const prata = Prata({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-prata',
   display: 'swap',
 });
 
@@ -44,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${jakarta.variable} ${jetbrains.variable}`}
+      className={`${fraunces.variable} ${prata.variable} ${jakarta.variable} ${jetbrains.variable}`}
     >
       <body>
         <div className="drafting-grid" aria-hidden="true" />

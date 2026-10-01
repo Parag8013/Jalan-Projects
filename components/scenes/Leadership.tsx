@@ -17,11 +17,13 @@ const initials = LEADERSHIP.ceo.name
 /**
  * Scene 11 — leadership.
  *
- * A nameplate rather than a portrait: there is no photograph of Mr Jalan in
- * this repository, and a stock headshot standing in for a real person is worse
- * than no image at all. The mark is set from his initials in the same drafting
- * language as the rest of the site, so the block reads as designed rather than
- * as a gap waiting for an asset.
+ * Portrait of Mr Jalan, supplied by the company (public/media/
+ * brij-mohan-jalan.jpg), with his initials set as a small plate hanging off its
+ * lower corner. The plate is the old nameplate kept on, so the block still
+ * carries the site's drafting language rather than being a bare photo.
+ *
+ * The name and initials use `.display-name` (Prata) rather than Fraunces,
+ * whose capital J drops below the baseline — see app/layout.tsx.
  *
  * Nothing here is attributed to him as a quotation. The principles are the
  * company's own words — see content/site.ts for why.
@@ -32,12 +34,25 @@ export default function Leadership() {
   useGSAP(
     () => {
       gsap.fromTo(
+        '[data-portrait]',
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.1,
+          ease: 'expo.out',
+          scrollTrigger: { trigger: root.current, start: 'top 72%', once: true },
+        },
+      );
+
+      gsap.fromTo(
         '[data-mark]',
         { opacity: 0, scale: 0.9 },
         {
           opacity: 1,
           scale: 1,
           duration: 0.9,
+          delay: 0.35,
           ease: 'expo.out',
           scrollTrigger: { trigger: root.current, start: 'top 72%', once: true },
         },
@@ -83,18 +98,34 @@ export default function Leadership() {
           <div>
             <p className="label text-gold">10 · Leadership</p>
 
-            <div
-              data-mark
-              className="mt-9 flex h-[104px] w-[104px] items-center justify-center border border-gold/45 opacity-0"
-            >
-              <span className="display text-[2rem] leading-none tracking-tight text-gold">
-                {initials}
-              </span>
+            <div className="relative mt-9 max-w-[420px]">
+              <div data-portrait className="overflow-hidden border border-gold/30 opacity-0">
+                <img
+                  src="/media/brij-mohan-jalan.jpg"
+                  alt={LEADERSHIP.ceo.name}
+                  width={1070}
+                  height={1281}
+                  loading="lazy"
+                  className="block h-auto w-full select-none"
+                  draggable={false}
+                />
+              </div>
+
+              {/* Hangs below the photo rather than past its side, so it never
+                  pushes into the page gutter on a phone. */}
+              <div
+                data-mark
+                className="absolute -bottom-9 right-6 flex h-[88px] w-[88px] items-center justify-center border border-gold/45 bg-carbon opacity-0"
+              >
+                <span className="display display-name text-[1.75rem] leading-none text-gold">
+                  {initials}
+                </span>
+              </div>
             </div>
 
             <RevealText
               as="h2"
-              className="display mt-9 max-w-[11ch] text-[length:var(--text-display-l)] leading-[1.02] text-white"
+              className="display display-name mt-16 max-w-[11ch] text-[length:var(--text-display-l)] leading-[1.18] text-white"
             >
               {LEADERSHIP.ceo.name}
             </RevealText>

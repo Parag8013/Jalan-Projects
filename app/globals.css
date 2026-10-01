@@ -91,6 +91,14 @@
     line-height: 1.03;
   }
 
+  /* Names with a capital J — see the note on Prata in app/layout.tsx. Pair it
+     with .display for size and spacing; this only swaps the face. */
+  .display-name {
+    font-family: var(--font-prata), var(--font-display);
+    font-variation-settings: normal;
+    letter-spacing: -0.01em;
+  }
+
   .display-xl {
     font-family: var(--font-display);
     font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
