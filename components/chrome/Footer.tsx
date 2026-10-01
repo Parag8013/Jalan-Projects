@@ -16,6 +16,9 @@ import { COMPANY, LEADERSHIP, PARKS } from '@/content/site';
  *
  * The 9% floor is what kills the halo — measure it before changing it, the
  * supplied JPEG carries up to 7.5% alpha of near-white in the background.
+ *
+ * The matte also keys out the lion's pale muzzle and mane highlights, so on
+ * this dark ground the face reads inverted. It is set on a white plate.
  */
 export default function Footer() {
   return (
@@ -28,7 +31,7 @@ export default function Footer() {
               alt=""
               width={186}
               height={241}
-              className="mb-6 h-16 w-auto select-none"
+              className="mb-6 box-content h-16 w-auto select-none rounded-sm bg-white p-2"
               draggable={false}
             />
             <p className="display text-[length:var(--text-display-s)] text-white">

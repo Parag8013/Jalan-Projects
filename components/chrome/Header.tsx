@@ -27,10 +27,6 @@ const NAV = [
  * frame, then takes a translucent ground and a hairline once the page moves.
  * Blurring only after the page has scrolled matters: a permanently blurred
  * fixed bar forces a full-viewport composite on every frame of the scrub.
- *
- * The crest is a JPEG on a white field, which cannot sit on this ground —
- * knocking the field out punches holes through the lion's muzzle. So the mark
- * here is typographic, which is what the footer already did.
  */
 export default function Header() {
   const root = useRef<HTMLElement>(null);
@@ -109,16 +105,16 @@ export default function Header() {
             className="flex items-center gap-3"
             aria-label={`${COMPANY.name} — home`}
           >
-            {/* The crest is gold line work on transparent, so it sits on the
-                dark ground without a plate behind it. Sized off the wordmark's
-                cap height rather than a round number, so the two read as one
-                lockup instead of a badge parked next to some type. */}
+            {/* The crest's white field is keyed out, and so are the pale parts
+                of the lion — on the dark ground those read as black and the
+                face looks inverted. It sits on a white plate so they read as
+                white, the way the mark was drawn. */}
             <img
               src="/crest.png"
               alt=""
               width={186}
               height={241}
-              className="h-8 w-auto shrink-0 select-none"
+              className="box-content h-8 w-auto shrink-0 select-none rounded-sm bg-white p-1"
               draggable={false}
             />
             <span className="display text-[1.0625rem] leading-none tracking-tight text-white">
