@@ -12,13 +12,30 @@ import { COMPANY, LEADERSHIP, PARKS } from '@/content/site';
  * knockout punches holes through the lion's muzzle and leaves a grey halo of
  * JPEG ringing. It needs a soft matte off the darkest channel instead:
  *
- *   magick public/logo-jalan.jpg -colorspace sRGB  *     \( +clone -channel RGB -separate -evaluate-sequence min  *        -negate -level 9%,40% \)  *     -alpha off -compose CopyOpacity -composite -trim +repage  *     -strip -dither None -colors 64 public/crest.png
+ *   magick public/logo-jalan.jpg -colorspace sRGB -channel RGB -separate
+ *     -evaluate-sequence min -negate -level 9%,40% +channel matte.png
  *
  * The 9% floor is what kills the halo — measure it before changing it, the
  * supplied JPEG carries up to 7.5% alpha of near-white in the background.
  *
- * The matte also keys out the lion's pale muzzle and mane highlights, so on
- * this dark ground the face reads inverted. It is set on a white plate.
+ * That matte alone also keys out the lion's white muzzle and pale mane, and
+ * on the dark ground the face then reads as a negative. So the matte only
+ * applies to the field around the lion: flood-fill the field from outside
+ * (it is one connected region through the gap under the arrow), and force
+ * everything it does not reach to opaque:
+ *
+ *   magick public/logo-jalan.jpg -fuzz 12% -fill magenta
+ *     -draw "color 0,0 floodfill" -draw "color 52,130 floodfill"
+ *     -draw "color 192,130 floodfill" -draw "color 62,70 floodfill"
+ *     -draw "color 182,70 floodfill"
+ *     -fill black -opaque magenta -fill white +opaque black
+ *     -morphology Erode Disk:1.5 -blur 0x0.7 interior.png
+ *   magick matte.png interior.png -compose Lighten -composite alpha.png
+ *   magick public/logo-jalan.jpg alpha.png -alpha off -compose CopyOpacity
+ *     -composite -trim +repage -strip public/crest.png
+ *
+ * The erode keeps the fill-edge fringe on the soft matte rather than opaque,
+ * which would otherwise draw a pale outline around the mane.
  */
 export default function Footer() {
   return (
@@ -29,9 +46,9 @@ export default function Footer() {
             <img
               src="/crest.png"
               alt=""
-              width={186}
+              width={185}
               height={241}
-              className="mb-6 box-content h-16 w-auto select-none rounded-sm bg-white p-2"
+              className="mb-6 h-16 w-auto select-none"
               draggable={false}
             />
             <p className="display text-[length:var(--text-display-s)] text-white">
