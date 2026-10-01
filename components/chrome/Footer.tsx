@@ -20,22 +20,24 @@ import { COMPANY, LEADERSHIP, PARKS } from '@/content/site';
  *
  * That matte alone also keys out the lion's white muzzle and pale mane, and
  * on the dark ground the face then reads as a negative. So the matte only
- * applies to the field around the lion: flood-fill the field from outside
- * (it is one connected region through the gap under the arrow), and force
- * everything it does not reach to opaque:
+ * applies outside the hexagon: the field inside it stays opaque white, and
+ * the crest reads as a white badge with nothing showing past its outline.
  *
- *   magick public/logo-jalan.jpg -fuzz 12% -fill magenta
- *     -draw "color 0,0 floodfill" -draw "color 52,130 floodfill"
- *     -draw "color 192,130 floodfill" -draw "color 62,70 floodfill"
- *     -draw "color 182,70 floodfill"
+ * The hexagon's two top edges stop short of the arrow, which would let a
+ * flood fill from outside leak into the badge. The mask closes that gap with
+ * a line before filling (the line is never drawn on the crest itself):
+ *
+ *   magick public/logo-jalan.jpg -stroke "#b8962e" -strokewidth 3
+ *     -draw "line 113,27 144,27" -fuzz 12% -fill magenta
+ *     -draw "color 0,0 floodfill"
  *     -fill black -opaque magenta -fill white +opaque black
- *     -morphology Erode Disk:1.5 -blur 0x0.7 interior.png
- *   magick matte.png interior.png -compose Lighten -composite alpha.png
+ *     -morphology Erode Disk:1.5 -blur 0x0.7 inside.png
+ *   magick matte.png inside.png -compose Lighten -composite alpha.png
  *   magick public/logo-jalan.jpg alpha.png -alpha off -compose CopyOpacity
  *     -composite -trim +repage -strip public/crest.png
  *
  * The erode keeps the fill-edge fringe on the soft matte rather than opaque,
- * which would otherwise draw a pale outline around the mane.
+ * which would otherwise leave a pale rim outside the gold outline.
  */
 export default function Footer() {
   return (

@@ -105,8 +105,9 @@ export default function Header() {
             className="flex items-center gap-3"
             aria-label={`${COMPANY.name} — home`}
           >
-            {/* The crest is gold line work on transparent, so it sits on the
-                dark ground without a plate behind it. Sized off the wordmark's
+            {/* The crest is a white hexagonal badge, transparent outside its
+                gold outline, so it sits on the dark ground with no plate
+                behind it. Sized off the wordmark's
                 cap height rather than a round number, so the two read as one
                 lockup instead of a badge parked next to some type. */}
             <img
