@@ -2,7 +2,7 @@
  * Site content and figures.
  *
  * Supplied by Jalan Projects (Sept 2026): year founded, the four headline
- * scale figures, the land sourcing range, plot availability and park road
+ * scale figures (plus sq ft built to date, Oct 2026), park total acreage, the land sourcing range, plot availability and park road
  * widths. Everything else is still ⚠ GENERATED — plausible for a Howrah
  * industrial developer, but not fact. See docs/VERIFY-BEFORE-LAUNCH.md.
  */
@@ -73,6 +73,7 @@ export type ScaleFigure = {
 export const SCALE_FIGURES: ScaleFigure[] = [
   { value: 3000, suffix: '+', label: 'Acres transacted', note: 'Since 1981' },
   { value: 130, suffix: 'M', label: 'Sq ft delivered', note: 'Of land handed over to buyers' },
+  { value: 3784080, suffix: '+', label: 'Sq ft built', note: 'Under roof, to date' },
   { value: 45, suffix: '', label: 'Years in operation', note: 'Continuously, under the same family' },
   { value: 0, suffix: '', text: 'Howrah', label: 'District covered', note: 'Where our land and parks are' },
 ];

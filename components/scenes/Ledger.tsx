@@ -16,8 +16,12 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
  * The hero ends on the ink ground with footage behind it, so the page cannot
  * snap back to cream on the very next section without throwing away everything
  * the build just earned. This band stays dark, states what the company is in
- * one paragraph, and puts the four figures underneath — credibility placed
+ * one paragraph, and puts the scale figures underneath — credibility placed
  * immediately after the spectacle rather than three screens later.
+ *
+ * Three across on large screens, not four or five: "37,84,080+" is ten mono
+ * characters at numeral size, and a quarter of a laptop-width row cannot
+ * hold it.
  *
  * The return to cream happens at the capability stack, which is where the site
  * stops performing and starts explaining.
@@ -105,13 +109,13 @@ export default function Ledger() {
 
             <div data-sig className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 opacity-0">
               <span className="h-px w-10 bg-gold" />
-              <span className="display text-[1.0625rem] text-white">{LEADERSHIP.ceo.name}</span>
+              <span className="display display-name text-[1.0625rem] text-white">{LEADERSHIP.ceo.name}</span>
               <span className="label text-ash">{LEADERSHIP.ceo.role}</span>
             </div>
           </div>
         </div>
 
-        <dl className="mt-[clamp(56px,8vw,112px)] grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="mt-[clamp(56px,8vw,112px)] grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {SCALE_FIGURES.map((f, i) => (
             <div key={f.label}>
               <span data-fig-rule className="mb-5 block h-px w-full origin-left bg-edge" />
