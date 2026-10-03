@@ -109,7 +109,7 @@ export default function Ledger() {
 
             <div data-sig className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 opacity-0">
               <span className="h-px w-10 bg-gold" />
-              <span className="display display-name text-[1.0625rem] text-white">{LEADERSHIP.ceo.name}</span>
+              <span className="display text-[1.0625rem] text-white">{LEADERSHIP.ceo.name}</span>
               <span className="label text-ash">{LEADERSHIP.ceo.role}</span>
             </div>
           </div>

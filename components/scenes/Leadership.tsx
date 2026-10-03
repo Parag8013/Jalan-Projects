@@ -22,9 +22,6 @@ const initials = LEADERSHIP.ceo.name
  * lower corner. The plate is the old nameplate kept on, so the block still
  * carries the site's drafting language rather than being a bare photo.
  *
- * The name and initials use `.display-name` (Prata) rather than Fraunces,
- * whose capital J drops below the baseline — see app/layout.tsx.
- *
  * Nothing here is attributed to him as a quotation. The principles are the
  * company's own words — see content/site.ts for why.
  */
@@ -117,7 +114,7 @@ export default function Leadership() {
                 data-mark
                 className="absolute -bottom-9 right-6 flex h-[88px] w-[88px] items-center justify-center border border-gold/45 bg-carbon opacity-0"
               >
-                <span className="display display-name text-[1.75rem] leading-none text-gold">
+                <span className="display text-[1.75rem] leading-none text-gold">
                   {initials}
                 </span>
               </div>
@@ -125,7 +122,7 @@ export default function Leadership() {
 
             <RevealText
               as="h2"
-              className="display display-name mt-16 max-w-[11ch] text-[length:var(--text-display-l)] leading-[1.18] text-white"
+              className="display mt-16 max-w-[11ch] text-[length:var(--text-display-l)] leading-[1.18] text-white"
             >
               {LEADERSHIP.ceo.name}
             </RevealText>

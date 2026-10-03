@@ -1,26 +1,12 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Plus_Jakarta_Sans, JetBrains_Mono, Prata } from 'next/font/google';
+import { Plus_Jakarta_Sans, JetBrains_Mono, Prata } from 'next/font/google';
 import ScrollRoot from '@/components/motion/ScrollRoot';
 import './globals.css';
 
 /**
- * Fraunces carries the personality. It is a high-contrast serif with optical
- * size, SOFT and WONK axes — the flared, slightly idiosyncratic cut is what
- * keeps an elegant serif from reading as stock luxury-realtor Playfair.
- */
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  axes: ['SOFT', 'WONK', 'opsz'],
-  style: ['normal', 'italic'],
-  variable: '--font-fraunces',
-  display: 'swap',
-});
-
-/**
- * Prata sets Mr Jalan's name and initials only. Fraunces draws its capital J
- * dropping below the baseline, which reads as a misspelling in "BMJ" and
- * "Jalan"; Prata keeps J on the line and is close enough in contrast and
- * stress to sit beside the Fraunces headings.
+ * Prata is the display face for every heading and name. It replaced Fraunces,
+ * whose capital J drops below the baseline and reads as a misspelling in
+ * "BMJ" and "Jalan". Prata ships one weight and no italic.
  */
 const prata = Prata({
   subsets: ['latin'],
@@ -57,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${prata.variable} ${jakarta.variable} ${jetbrains.variable}`}
+      className={`${prata.variable} ${jakarta.variable} ${jetbrains.variable}`}
     >
       <body>
         <div className="drafting-grid" aria-hidden="true" />
